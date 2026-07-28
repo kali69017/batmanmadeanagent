@@ -1,0 +1,8 @@
+.env
+env/
+.venv/
+__pycache__/
+*.pyc
+yf_data/
+.opencode/
+yf_data_archive.zip
