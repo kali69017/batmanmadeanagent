@@ -117,22 +117,80 @@ def _apply_monkey_patches():
 
     _FSMW._create_write_file_tool = _patched_create_write_file_tool
 
-    from langchain.agents.middleware.todo import WriteTodosInput as _WTI
-    _orig_wt_fields = _WTI.model_fields.copy()
-    _WTI.model_fields["content"] = _Field(
-        default=None,
-        description="Alias for 'todos'. Pass the todo list here if you used 'content' instead of 'todos'.",
+    # =========================================================================
+    # Fix 1: write_todos content alias (Pydantic v2 safe — create_model subclass)
+    # =========================================================================
+    import langchain.agents.middleware.todo as _todo_mod
+    from langchain.agents.middleware.todo import (
+        WriteTodosInput as _WTI,
+        _write_todos as _orig_write_todos_func,
+        _awrite_todos as _orig_awrite_todos_func,
+        Todo as _Todo,
     )
-    _orig_wt_init = _WTI.__init__
+    from langchain.tools import ToolRuntime as _ToolRuntime
 
-    def _patched_wt_init(self, **data):
-        if "content" in data and data["content"] is not None and "todos" not in data:
-            data["todos"] = data.pop("content")
-        elif "content" in data and "todos" in data:
-            data.pop("content", None)
-        _orig_wt_init(self, **data)
+    _PatchedWTI = _create_model(
+        "PatchedWriteTodosInput",
+        __base__=_WTI,
+        content=(list | None, _Field(default=None, description="Alias for 'todos'. Pass the todo list here. Ignored if 'todos' is also provided.")),
+    )
 
-    _WTI.__init__ = _patched_wt_init
+    def _patched_write_todos(runtime: _ToolRuntime, todos: list[_Todo], content: list[_Todo] | None = None):
+        content = None  # content alias handled by schema — ignore
+        return _orig_write_todos_func(runtime, todos)
+
+    def _patched_awrite_todos(runtime: _ToolRuntime, todos: list[_Todo], content: list[_Todo] | None = None):
+        content = None
+        return _orig_awrite_todos_func(runtime, todos)
+
+    _todo_mod.WriteTodosInput = _PatchedWTI
+    _todo_mod._write_todos = _patched_write_todos
+    _todo_mod._awrite_todos = _patched_awrite_todos
+
+    # =========================================================================
+    # Fix 2: edit_file no-op guard — reject old_string == new_string
+    # =========================================================================
+    _orig_create_edit_tool = _FSMW._create_edit_file_tool
+
+    def _patched_create_edit_file_tool(self):
+        tool = _orig_create_edit_tool(self)
+
+        _orig_func = tool.func
+        @functools.wraps(_orig_func)
+        def _wrapped_edit_func(*args, **kwargs):
+            old_string = kwargs.get("old_string", "")
+            new_string = kwargs.get("new_string", "")
+            if old_string and old_string == new_string:
+                from langchain_core.messages import ToolMessage as _TM
+                return _TM(
+                    content="Error: old_string is identical to new_string — nothing to change. Provide different content for new_string.",
+                    name="edit_file",
+                    tool_call_id=kwargs.get("runtime").tool_call_id if hasattr(kwargs.get("runtime"), "tool_call_id") else "",
+                    status="error",
+                )
+            return _orig_func(*args, **kwargs)
+        tool.func = _wrapped_edit_func
+
+        if tool.coroutine is not None:
+            _orig_coro = tool.coroutine
+            @functools.wraps(_orig_coro)
+            async def _wrapped_edit_coro(*args, **kwargs):
+                old_string = kwargs.get("old_string", "")
+                new_string = kwargs.get("new_string", "")
+                if old_string and old_string == new_string:
+                    from langchain_core.messages import ToolMessage as _TM
+                    return _TM(
+                        content="Error: old_string is identical to new_string — nothing to change. Provide different content for new_string.",
+                        name="edit_file",
+                        tool_call_id=kwargs.get("runtime").tool_call_id if hasattr(kwargs.get("runtime"), "tool_call_id") else "",
+                        status="error",
+                    )
+                return await _orig_coro(*args, **kwargs)
+            tool.coroutine = _wrapped_edit_coro
+
+        return tool
+
+    _FSMW._create_edit_file_tool = _patched_create_edit_file_tool
 
 
 # ---------------------------------------------------------------------------
@@ -190,6 +248,16 @@ get_insider_transactions, get_quant_factors.
 Your job: produce a concise fundamental assessment. Call only the tools
 you need — usually get_fundamentals + get_quant_factors is enough.
 
+CRITICAL RULES:
+- When a ticker has negative earnings or a large trailing loss, report the
+  number as-is. Do NOT assert "one-time charges," "impairments," or other
+  explanations for the loss unless you have verified this claim through a
+  specific tool call. State the earnings decline factually and flag it as
+  unverified if you cannot confirm the cause.
+- When evaluating valuation (PEG, P/E, P/FCF), compare to the ticker's
+  sector context if available. A PEG of 5x in Healthcare may be normal;
+  in Tech it is extreme. Be consistent across tickers.
+
 Return ONLY valid JSON with these fields:
 {{
   "ticker": "<string>",
@@ -233,16 +301,35 @@ You have NO data-fetching tools — all the data is in the TA and FA
 inputs passed to you. Use your expertise to weigh conflicting signals
 and produce a clear verdict.
 
+CRITICAL: Entry zones, stops, and targets MUST be grounded in the TA and
+FA data you receive. Follow these rules:
+- The entry_zone must be anchored to the TA key_levels (support/resistance)
+  and current price provided in the TA summary.
+- entry_zone high must not exceed the TA resistance level (if available).
+- entry_zone low must be near the TA support level (if available).
+- stop_loss must be below the TA support level.
+- Target prices must be at or below the TA resistance level for T1,
+  and can extend beyond resistance for T2 but with explicit justification.
+- Never invent prices that deviate more than 10% from the current price
+  provided in the TA data. If the TA data lacks key levels, set
+  entry_zone to null values and explain why.
+- If the TA summary includes a latest_close price, the entry zone must be
+  within 10% of it in either direction. An entry zone of $63 when the
+  stock trades at $145 is a hallucination — flag it as "inconsistent with
+  current price" and set entry_zone to null.
+
 Return ONLY valid JSON with these fields:
 {{
   "ticker": "<string>",
-  "direction": "long|short|hold|pass",
-  "entry_zone": {{"low": <float>, "high": <float>}},
-  "stop_loss": <float>,
+  "direction": "long|hold|pass",
+  "entry_zone": {{"low": <float|null>, "high": <float|null>}},
+  "stop_loss": <float|null>,
   "targets": [{{"price": <float>, "timeframe": "<string>"}}],
   "conviction": "HIGH|MEDIUM|LOW",
   "rationale": "<1-3 sentence rationale referencing both TA and FA>"
 }}
+
+IMPORTANT: This portfolio is long-only. Do NOT recommend short positions. If the stock looks bearish, recommend "hold" or "pass" instead.
 """
 
 
@@ -268,12 +355,14 @@ Benchmarks (SPY, QQQ, DIA, IWM) are only available via get_relative_strength.
 ## Workflow (execute phases in order every session)
 
 ### Phase 0 — Review & Learn (mandatory first step)
-- Read lessons.md and open_trades/ via read_file
+- Read lessons.md, open_trades/ (filled positions), and pending_entries/ via read_file
 - Check each open trade with fresh data (get_technical_analysis force_refresh=True)
+- For each open trade: compare current price to stop_loss. If breached, write updated file to closed_trades/ immediately. If approaching, tighten the stop in the trade file.
 - If a trade should close: write updated file to closed_trades/, delete from open_trades/
-- Update lessons.md if you learned something generalizable
+- Update lessons.md with any new generalizable insights (MANDATORY — do this every run)
 - Check signals_log/ via read_file for win rate context
 - If any signal had <40% win rate, note it as unreliable
+- IMPORTANT: Distinguish between open_trades/ (type: filled — positions you actually entered) and pending_entries/ (type: pending — entry zone not yet triggered). Count only filled entries as real open positions.
 
 ### Phase 1 — Screen the watchlist
 Call run_screening() to get the top 10 candidates.
@@ -285,23 +374,38 @@ For each of the top 10 tickers, fire TWO task() calls in ONE turn:
   task("technical-analyst", ticker="AAPL")
   task("fundamentals-analyst", ticker="AAPL")
 
+IMPORTANT: Before Phase 2, check open_trades/ and pending_entries/ via ls. Exclude any ticker that already has an open trade (type: filled) or a pending entry. Only deep-dive NEW candidates NOT already in the portfolio.
+
 Issue ALL 20 task() calls in the SAME turn — they execute in parallel.
 Then wait for results.
 
-### Phase 3 — Expert synthesis
-For each ticker, fire ONE task() call:
+### Phase 3 — Expert synthesis (MANDATORY for every Phase 2 ticker)
+For each ticker that passed through Phase 2, fire ONE task() call:
   task("financial-expert", ticker="AAPL", ta_output=<TA JSON>, fa_output=<FA JSON>)
 
-Issue ALL 10 task() calls in ONE turn — they execute in parallel.
+IMPORTANT: Every ticker that received Phase 2 deep-dive MUST also receive a Phase 3
+expert synthesis. No exceptions. If you skip a ticker here, explain why in
+the final report. The expert subagent resolves TA vs FA conflicts — skipping
+it means the ticker's recommendation is incomplete.
+
+CRITICAL: In each task description, include the CURRENT PRICE from the
+get_price_data or get_technical_analysis tool output. Format:
+  "Current price: $XXX. TA support: $XX, TA resistance: $YY."
+This anchors the expert's entry zone to real prices and prevents hallucination.
+
+Issue ALL task() calls in ONE turn — they execute in parallel.
 Then wait for results.
 
 ### Phase 4 — Rank & write to memory
 - Compare expert outputs by conviction and rationale
 - Call check_portfolio_exposure before opening any new position
-- Write picks to /memories/open_trades/YYYY-MM-DD--TICKER.md via write_file with overwrite=True (same-ticker re-entries get sequence suffix --N)
+- Write filled positions (type: filled) to /memories/open_trades/YYYY-MM-DD--TICKER.md via write_file with overwrite=True
+- Write pending entries (type: pending — waiting for entry zone to trigger) to /memories/pending_entries/YYYY-MM-DD--TICKER.md via write_file with overwrite=True
+- All trade files MUST include a YAML field `type: filled` or `type: pending` in the frontmatter
 - Write rejects to /memories/watchlist/ via write_file with overwrite=True
-- Update lessons.md if anything generalizable emerged
-- Update signals_log/ entries via write_file (one file per signal name)
+- MANDATORY: Write a watchlist or reject file for EVERY ticker that passed through Phase 2-3. No ticker goes unlogged.
+- Update lessons.md with any new generalizable insights (MANDATORY)
+- Update signals_log/ entries via write_file (one file per signal name). For each signal you used, ensure a file exists — initialize new signal files on first use (triggered_correctly: 0, triggered_falsely: 0).
 
 ## Token efficiency rules
 - Every subagent return must be concise JSON — no prose
@@ -312,7 +416,7 @@ Then wait for results.
 ## Answering the user
 After completing all phases, answer the user's question. Distinguish:
   - A trade you recommend entering NOW (justify timing, not just thesis)
-  - A position already open (state current status)
+  - A position already open (state current status, distinguish between filled and pending)
   - A watchlist item (state condition and that it is NOT YET met)
 
 You are not a licensed financial advisor — say so explicitly.

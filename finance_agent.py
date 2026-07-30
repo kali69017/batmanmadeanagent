@@ -83,23 +83,32 @@ if __name__ == "__main__":
     def _print_subagent(name: str, action: str):
         print(f"\n\033[1;33m\u1F916 SUB-AGENT [{name}]: {action}\033[0m")
 
+
+
     query = (
+        "Scan the full market now and suggest me good trade ideas with entry zone, target price and stoploss price as well."
+    )
+
+    '''query = (
         "Scan the watchlist and tell me if any stocks are worth buying right now. "
         "If you find good trade ideas, give me the top ones with entry zones, "
         "stop losses, targets, and rationale. If no stocks are good to buy now, "
         "just suggest the best candidates as watchlist items with the condition "
         "that needs to be met before entry."
-    )
+    )'''
 
     is_scan_query = any(kw in query.lower() for kw in ["scan", "screen", "rank", "best", "top", "suggest", "watchlist", "market leaders"])
 
     mem = config.AGENT_FS_ROOT / "memories"
     _pre_run_open: set[str] = set()
     open_dir = mem / "open_trades"
+    pending_dir = mem / "pending_entries"
     watch_dir = mem / "watchlist"
     closed_dir = mem / "closed_trades"
     if open_dir.is_dir():
         _pre_run_open = {f.stem for f in open_dir.glob("*.md")}
+    if pending_dir.is_dir():
+        _pre_run_open |= {f.stem for f in pending_dir.glob("*.md")}
     _written_memory_files: set[str] = set()
     _reviewed_trade_files: set[str] = set()
     _tool_called_symbols: set[str] = set()
@@ -216,10 +225,10 @@ if __name__ == "__main__":
     if is_scan_query:
         reviewed = set()
         for fp in _written_memory_files:
-            if fp.startswith("/memories/open_trades/"):
+            if fp.startswith("/memories/open_trades/") or fp.startswith("/memories/pending_entries/"):
                 reviewed.add(Path(fp).stem)
         for fp in _reviewed_trade_files:
-            if fp.startswith("/memories/open_trades/"):
+            if fp.startswith("/memories/open_trades/") or fp.startswith("/memories/pending_entries/"):
                 reviewed.add(Path(fp).stem)
         unresolved = _pre_run_open - reviewed
         if unresolved:
@@ -242,6 +251,7 @@ if __name__ == "__main__":
             if ticker in config.WATCHLIST:
                 tracked_syms.add(ticker)
         for d, exists in [(open_dir, open_dir and open_dir.is_dir()),
+                          (pending_dir, pending_dir and pending_dir.is_dir()),
                           (watch_dir, watch_dir and watch_dir.is_dir()),
                           (closed_dir, closed_dir and closed_dir.is_dir())]:
             if exists:

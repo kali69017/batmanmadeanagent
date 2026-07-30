@@ -1418,6 +1418,30 @@ def run_screening() -> str:
 
     active_watchlist = [s for s in config.WATCHLIST if s not in exclusions]
 
+    # Fundamental quality gate: exclude tickers with deeply negative margins
+    # or no earnings power (both trailing and forward P/E unavailable).
+    # This filters out crypto miners and other structurally unprofitable names
+    # that would otherwise rank high on momentum alone.
+    def _passes_fundamental_gate(sym: str) -> bool:
+        try:
+            fund = json.loads(get_fundamentals(sym))
+        except Exception:
+            return True  # can't determine — let through (data may be stale)
+        profit_margins = fund.get("profitMargins")
+        if profit_margins is not None and profit_margins < -0.50:
+            return False
+        trailing_pe = fund.get("trailingPE")
+        forward_pe = fund.get("forwardPE")
+        if trailing_pe is None and forward_pe is None:
+            return False
+        return True
+
+    filtered = [s for s in active_watchlist if _passes_fundamental_gate(s)]
+    dropped = [s for s in active_watchlist if s not in filtered]
+    if dropped:
+        print(f"[SCREENING] Fundamental quality gate excluded: {', '.join(sorted(dropped))}")
+    active_watchlist = filtered
+
     summary_path = config.CACHE_DIR / "watchlist_summary.json"
     if not _cache_is_stale(summary_path, max_age_hours=config.SIDECAR_MAX_AGE_HOURS):
         try:

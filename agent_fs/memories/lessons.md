@@ -1,88 +1,82 @@
-# Trading lessons (cumulative, principle-level only)
+# Lessons Learned
 
-- Oversold + negative CMF (distribution) tends to mean continuation, not
-  reversal, even when RSI and golden-cross structure look textbook mean-reversion.
-  (Seen in: TJX, stopped out -2.02% — CMF was -0.093 at entry, worsened to -0.179.)
+## Generalizable Trading Rules
 
-- An 'RSI crosses 50 + MACD turns positive' exit condition fires very early in
-  a mean-reversion move, often capturing <20% of the distance to the stated
-  target. Consider it a signal to tighten the stop and reassess, not automatic
-  full-close. (Seen in: XOM, closed +0.53% against a 5.4-8.4% target.)
+### 1. OBV Divergence + Negative CMF = Dealbreaker
+- Even with elite FA (AVGO: PEG 0.43, 47.9% revenue growth), if OBV shows bearish divergence and CMF stays negative for 3+ sessions after entry, exit early regardless of stop distance.
+- AVGO stopped out 7/30: OBV divergence + negative CMF persisted throughout. ADX never recovered above 20.
 
-- Entering a momentum/trend-continuation name after a >20% one-month run
-  means buying near the top of a vertical move — expect a near-term give-back
-  even if the underlying thesis is fine. (Seen in: DELL, entered after +21.65%
-  monthly return, immediately pulled back -1.33%.)
+### 2. ADX < 20 = No Trend — Don't Bet on Trend Formation
+- When ADX is below 20, the stock has no trend. Betting on a new trend forming is speculation, not trend-following.
+- AVGO lesson: ADX 15.7 at entry, never recovered. The fundamental thesis was right but timing was wrong.
 
-- An unbounded 'RSI > 55' filter for a 'market leaders' screen tends to
-  surface late-stage-momentum names (RSI 65-75+) that are 'hold if already in,
-  don't chase' — not actionable fresh entries. Needs an upper bound or a
-  distance-from-high filter. (Seen in: JNJ RSI 74.2, AAPL RSI 61.7.)
+### 3. Negative CMF After Entry = Immediate Yellow Flag (GOOG/TJX Rule)
+- If CMF flips negative after entry, tighten stop immediately. If it stays negative for 3+ sessions, exit.
+- Applies to: DAL (CMF -0.032), META (CMF -0.053 at entry — sized smaller).
 
-- ADX > 35 with deeply negative CMF makes oversold signals continuation
-  patterns, not reversal patterns. (Seen in: PFE rejected twice, fell -6.26%.)
+### 4. Death Cross + Extreme Oversold + Elite FA = Mean-Reversion, Not Trend-Following
+- META pattern: death cross active, StochRSI 0.0, CCI -980, but PEG 0.81, 33% revenue growth.
+- Differentiated from RDDT (which failed): the FA backstop is what makes this tradeable.
+- Signal: extreme_oversold_fa_backstop (StochRSI < 5 + CCI < -500 + PEG < 1.0 + rev growth > 25%)
 
-- Sidecar/summary RSI data can be stale by 30+ points (ADBE showed 19.2 in
-  sidecar but 62.8 live). Always verify with force_refresh=True before acting.
-  (Seen in: ADBE, AAPL stale rejections.)
+### 5. Defensive/Low-Beta Names: Prioritize T1 Profit-Taking
+- ABBV, JNJ, MRK, XOM, CVX: beta < 0.5 means limited upside velocity.
+- Take 50% partial at T1, let remainder run with tighter stop.
+- The reversion pull is stronger than momentum continuation in defensive names.
 
-- When ADX collapses from strong-trend territory (>30) to no-trend (<20)
-  within days, the original trend-following thesis is invalidated regardless
-  of what other indicators show. Take full profits, don't leave a runner.
-  (Seen in: NVDA, ADX 33.3→15.5 in 5 days, remaining half stopped at breakeven.)
+### 6. Sector Concentration Management
+- Technology is the most crowded sector. Max 4 Tech positions at any time.
+- NVDA rejected as FILLED due to 5th Tech position — moved to PENDING.
+- Diversify across Healthcare, Energy, Financials, Communication Services.
 
-- On defensive/low-beta stocks (beta < 0.5), a +10%+ 1-month run vs SPY is
-  an unusually large move — take partial or full profit at T1 rather than
-  holding for T2, even if the technical structure still looks constructive.
-  The low beta means the stock isn't built for sustained momentum runs; the
-  reversion pull is stronger. (Seen in: ABBV, +12% 1mo vs SPY, hit T1 +3.66%
-  in 1 week, would have given back if held for T2.)
+### 7. Oversold + Negative CMF = Continuation, Not Reversal (TJX Lesson)
+- When a stock is oversold but CMF is negative, the oversold condition is more likely to continue than reverse.
+- META entered with negative CMF (-0.053) — sized smaller as a result.
 
-- When a death cross is intact and price breaks below SMA20 with momentum,
-  even strong accumulation (CMF +0.138) and heavily washed-out Stoch RSI
-  won't save a mean-reversion trade. The structural trend (death cross)
-  overrides the tactical signal (oversold + accumulation). Wait for price
-  to reclaim SMA20 AND SMA50 before trusting accumulation in death cross
-  names. (Seen in: RDDT, stopped out -7.5% and -8.4% across two separate entries.)
+### 8. Screening Composite Scores < 30 = Narrow Market
+- When all composite scores are below 30, the market is narrow and selective.
+- Be patient. Don't force trades in low-scoring environments.
+- Today's top score: CRM 26.5 — confirms narrow market conditions.
 
-- OBV bearish divergence (price up >10% while OBV falls >10% over 6mo) is a
-  near-universal rejection signal regardless of bullish price structure. Even
-  with golden cross, price above all SMAs, and positive CMF, OBV divergence
-  weakens conviction to the point of unreliability. (Seen in: PLD rejected
-  7/23, AVGO rejected 7/22, JNJ rejected 7/22.)
+### 9. Pending vs Filled — Clear Distinction
+- type: filled = position actually entered
+- type: pending = entry zone not yet triggered
+- Only count filled entries as real open positions for exposure management.
 
-- When a scan surfaces 3+ strong candidates all in the same sector (e.g.,
-  Technology), sector concentration risk alone can justify passing on the
-  2nd and 3rd best names. The incremental benefit of a 3rd tech position
-  is lower than the risk of correlated drawdown. (Seen in: 7/23 scan —
-  AVGO, AAPL, AMD all Tech; CRM, SNOW already open in Tech.)
+### 10. META Entry Zone Triggered with Negative CMF
+- When a pending entry triggers but CMF is negative, reduce position size by 30-50%.
+- If CMF doesn't turn positive within 3-5 sessions, exit early.
 
-- When CMF flips negative on an oversold mean-reversion trade, exit immediately
-  rather than waiting for a tightened stop to trigger. The gap risk on a
-  deteriorating name is real — price can blow through the stop before you
-  can react. The TJX lesson (oversold + negative CMF = continuation) is
-  the governing principle. (Seen in: GOOG, CMF flipped from +0.022 to -0.004
-  to -0.12, price gapped from $347 to $318 through the $340 tightened stop.)
+### 11. Death Cross + Negative CMF = Same-Day Stop-Out Risk (META Lesson)
+- META stopped out same day (7/30): entered at $585.61, closed at $534.65 (-8.7%).
+- Death cross + negative CMF (-0.053) + falling OBV = the oversold condition continued, didn't reverse.
+- **New rule: If CMF is negative at entry AND death cross is active, DO NOT ENTER.**
+- The extreme_oversold_fa_backstop signal now requires CMF > 0 as a prerequisite.
+- Even elite FA (PEG 0.81, 33% revenue growth) cannot overcome the structural headwinds of death cross + negative CMF.
 
-- When the composite screening score is dominated by 12-1mo momentum (e.g.,
-  RIOT +74%, HUT +450%), the resulting top-10 list will be heavy on
-  momentum-driven names with toxic fundamentals. The screen is useful for
-  surfacing candidates but the composite score alone should never be the
-  basis for entry — always cross-reference with the FA deep-dive. A high
-  composite score driven by momentum in an unprofitable company is a
-  momentum trap, not a buy signal. (Seen in: 7/25 scan — RIOT #1 with 30.9
-  composite but -133% margins; HUT #6 with 23.8 but -110% margins.)
+### 12. Same-Day Stop-Outs = Signal Failure, Not Bad Luck
+- When a trade stops out within the same session, the entry signal was wrong.
+- META: entered at open, stopped out by close. The signal (extreme_oversold_fa_backstop) was incomplete.
+- Update signal criteria immediately — don't wait for a second failure.
 
-- When 6+ of the top 10 screening candidates are in the same sector
-  (Technology/Crypto), the screen is telling you the market is narrow, not
-  that you should load up on that sector. Use the screen as a starting
-  point, then deliberately seek non-correlated candidates from outside
-  the top 10. (Seen in: 7/25 scan — 6 of top 10 were Tech/Crypto; had to
-  manually pull ABT, PG, UBER to find non-Tech candidates.)
+### 13. Momentum Trap: High Composite Score Driven by Past Returns, Not Current Trend
+- RKLB: composite score 23.4 (rank #5), momentum 12-1 +84%, but current trend is bearish
+  (below all SMAs, Aroon Down 96, CMF -0.33, ADX 35.8 bearish).
+- The composite score formula weights momentum_12_1 at 35% — a stock can rank high
+  on past returns while currently in freefall.
+- **New rule: If momentum_12_1 > 50% but price is below SMA20 AND CMF < -0.20, it's a momentum trap. Reject.**
+- This is the mirror image of Lesson #8 (oversold + negative CMF = continuation).
 
-- When ADX is below 20 and MACD is bearish, even strong accumulation
-  (CMF +0.165) and a golden cross won't prevent a pullback from turning
-  into a stop-out. No trend means no floor — wait for ADX > 20 AND MACD
-  bullish before entering trend-following trades, regardless of how good
-  the fundamentals look. (Seen in: AMD, stopped out -6.5% — CMF stayed
-  positive through the decline but ADX 16.3 + bearish MACD overrode it.)
+### 14. Strong Trend + Overbought = Wait, Don't Chase (ABBV Pattern)
+- ABBV: golden cross, ADX 38.5, Aroon 96/0 — structurally perfect. But StochRSI 84.8,
+  MACD bearish crossover, CMF -0.18 distribution = near-term pullback imminent.
+- Even the best trends need to breathe. Entering at overbought extremes in a strong
+  trend is still a bad entry — you'll likely get a better price within days.
+- **Rule: When ADX > 35 AND StochRSI > 80, wait for pullback to SMA20 before entering.**
+
+### 15. Great FA Cannot Override ADX < 20 + Bearish Aroon (APH Corollary)
+- APH: 55% revenue growth, 59% earnings growth, 38% ROE, PEG 1.23 — elite FA.
+  But ADX 15.6 (no trend), Aroon Down 92, CMF -0.125, MACD bearish.
+- Reinforces Lesson #2: ADX < 20 = no trend. Don't bet on trend formation.
+- The golden cross provides structural support but doesn't override tactical bearish signals.
+- **Rule: FA quality is irrelevant if ADX < 20 and Aroon is bearish. Wait for trend to form.**
