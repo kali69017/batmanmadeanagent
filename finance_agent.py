@@ -86,7 +86,7 @@ if __name__ == "__main__":
 
 
     query = (
-        "Scan the full market now and suggest me good trade ideas with entry zone, target price and stoploss price as well."
+        "what are current pending and watchlist positions?"
     )
 
     '''query = (
