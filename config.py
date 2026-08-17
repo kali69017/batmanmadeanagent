@@ -167,20 +167,27 @@ EXPANDED_WATCHLIST = sorted(
 # Full scan — the union of Fasset and Expanded lists (100+ tickers).
 FULL_WATCHLIST = sorted(set(FASSET_WATCHLIST) | set(EXPANDED_WATCHLIST))
 
-# Backward-compatible: WATCHLIST is the full list. Tools that want the
-# Fasset-only list should use FASSET_WATCHLIST explicitly.
-WATCHLIST = FULL_WATCHLIST
+# List 2 — temporary 5-ticker test list.
+LIST_2 = ["AAPL", "MSFT", "NVDA", "GOOG", "META"]
+
+# ── ACTIVE WATCHLIST ─────────────────────────────────────────────────────
+# The agent screens and validates against WATCHLIST. To switch between the
+# 5-ticker test list and the full 136-ticker list, change ONLY the right-hand
+# side of this ONE assignment:
+#   LIST_2          → 5-ticker test list (current, for testing)
+#   FULL_WATCHLIST  → all 136 tickers (production)
+WATCHLIST = LIST_2
 
 
 def get_watchlist(mode: str = "full") -> list[str]:
     """Return the watchlist for a given scan mode.
 
     Args:
-        mode: "fasset" for the curated 44, "full" for all 100+ (default).
+        mode: "fasset" for the curated 44, "full" for the active list (default).
     """
     if mode == "fasset":
         return FASSET_WATCHLIST
-    return FULL_WATCHLIST
+    return WATCHLIST
 
 ALLOWED_BENCHMARKS = ["SPY", "QQQ", "DIA", "IWM"]
 
