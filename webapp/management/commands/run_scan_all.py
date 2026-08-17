@@ -19,13 +19,32 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("--mode", default="full", choices=["full", "fasset"])
         parser.add_argument("--clients-only", action="store_true", help="Skip staff/superuser accounts.")
+        parser.add_argument("--force", action="store_true", help="Run even on weekends or market holidays.")
 
     def handle(self, *args, **options):
+        from datetime import date
+
         from django.core.management import call_command
+
+        from webapp.market_holidays import is_market_holiday
 
         User = get_user_model()
         mode = options["mode"]
         clients_only = options["clients_only"]
+        force = options["force"]
+
+        today = date.today()
+        if not force:
+            if today.weekday() >= 5:  # 5=Saturday, 6=Sunday
+                self.stdout.write(self.style.WARNING(
+                    f"Skipping scan: weekend ({today}). Use --force to override."
+                ))
+                return
+            if is_market_holiday(today):
+                self.stdout.write(self.style.WARNING(
+                    f"Skipping scan: market holiday ({today}). Use --force to override."
+                ))
+                return
 
         qs = User.objects.filter(is_active=True)
         if clients_only:
