@@ -3,13 +3,18 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv()
+# Project root — config.py lives at the repo root. Anchor paths here so they
+# resolve correctly regardless of the process working directory (e.g. on
+# PythonAnywhere, where the WSGI process and Always-on Task have different CWDs).
+_BASE_DIR = Path(__file__).resolve().parent
+
+load_dotenv(_BASE_DIR / ".env")
 
 MODEL_NAME = os.getenv("MODEL_NAME", "deepseek/deepseek-v4-pro")
 API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 BASE_URL = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
 
-CACHE_DIR = Path(os.environ.get("YF_CACHE_DIR", "yf_data"))
+CACHE_DIR = Path(os.environ.get("YF_CACHE_DIR", str(_BASE_DIR / "yf_data")))
 CACHE_MAX_AGE_HOURS = float(os.environ.get("YF_CACHE_MAX_AGE_HOURS", "24"))
 SIDECAR_MAX_AGE_HOURS = float(os.environ.get("YF_SIDECAR_MAX_AGE_HOURS", "24"))
 NEWS_CACHE_MAX_AGE_HOURS = float(os.environ.get("YF_NEWS_CACHE_MAX_AGE_HOURS", "6"))
@@ -21,7 +26,7 @@ INTRADAY_CACHE_FILE = Path(
     os.environ.get("YF_INTRADAY_CACHE_FILE", str(CACHE_DIR / "_intraday_cache.pkl"))
 )
 
-AGENT_FS_ROOT = Path(os.environ.get("AGENT_FS_ROOT", "agent_fs")).resolve()
+AGENT_FS_ROOT = Path(os.environ.get("AGENT_FS_ROOT", str(_BASE_DIR / "agent_fs"))).resolve()
 AGENT_FS_ROOT.mkdir(parents=True, exist_ok=True)
 
 STOPOUT_COOLDOWN_DAYS = int(os.environ.get("STOPOUT_COOLDOWN_DAYS", "14"))
