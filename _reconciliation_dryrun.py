@@ -1,5 +1,8 @@
 """Find ticker-collision pairs and stale pointer files in open_trades."""
-import sys; sys.path.insert(0, 'D:\\Fasset')
+
+import sys
+
+sys.path.insert(0, "D:\\Fasset")
 from pathlib import Path
 from collections import defaultdict
 
@@ -15,6 +18,7 @@ for fp in sorted(d.glob("*.md")):
         date_part = parts[0]
         # Check if date_part is a valid date
         import re
+
         if re.match(r"^\d{4}-\d{2}-\d{2}$", date_part):
             ticker = parts[1]
         else:
@@ -33,8 +37,14 @@ for ticker, files in sorted(by_ticker.items()):
             raw = fp.read_text(encoding="utf-8")
             first_line = raw.split("\n")[0].strip()
             frontmatter = raw.startswith("---")
-            is_stale = first_line.startswith("MOVED to") or first_line.startswith("# Stale")
-            tag = "STALE (pointer)" if is_stale else ("FRONTMATTER" if frontmatter else "NO FRONTMATTER")
+            is_stale = first_line.startswith("MOVED to") or first_line.startswith(
+                "# Stale"
+            )
+            tag = (
+                "STALE (pointer)"
+                if is_stale
+                else ("FRONTMATTER" if frontmatter else "NO FRONTMATTER")
+            )
             print(f"    {fp.name:45s} [{tag}] {first_line[:60]}")
 
 if not found_collision:

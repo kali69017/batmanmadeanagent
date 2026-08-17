@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 
 sys.path.insert(0, "D:\\Fasset")
 import agents
+
 agents._apply_monkey_patches()
 
 from deepagents.middleware.filesystem import FilesystemMiddleware
@@ -34,9 +35,7 @@ print("  PASS")
 
 # --- Test 3: _parse_input defaults overwrite=False ---
 print("=== Test 3: _parse_input defaults overwrite=False ===")
-parsed2 = tool._parse_input(
-    {"file_path": "/test.txt", "content": "new"}, "test-id"
-)
+parsed2 = tool._parse_input({"file_path": "/test.txt", "content": "new"}, "test-id")
 assert parsed2.get("overwrite") is False
 print("  PASS")
 
@@ -79,6 +78,7 @@ print("  PASS")
 # --- Test 8: Full wrapper dispatch with overwrite=True ---
 print("=== Test 8: Full wrapper dispatch with overwrite=True ===")
 
+
 class _FakeRuntime:
     tool_call_id = "test-123"
     state = {}
@@ -87,10 +87,12 @@ class _FakeRuntime:
     context = None
     stream_writer = None
 
+
 runtime = _FakeRuntime()
 
-result = tool.func(file_path="/test.txt", content="wrapper ok",
-                   overwrite=True, runtime=runtime)
+result = tool.func(
+    file_path="/test.txt", content="wrapper ok", overwrite=True, runtime=runtime
+)
 assert isinstance(result, ToolMessage), f"Expected ToolMessage, got {type(result)}"
 assert result.status == "success", f"Expected success, got {result.status}"
 assert open(resolved).read() == "wrapper ok"
@@ -105,8 +107,9 @@ print("  PASS")
 
 # --- Test 10: Wrapper with overwrite=False ---
 print("=== Test 10: Wrapper with overwrite=False fails ===")
-result = tool.func(file_path="/test.txt", content="should fail",
-                   overwrite=False, runtime=runtime)
+result = tool.func(
+    file_path="/test.txt", content="should fail", overwrite=False, runtime=runtime
+)
 assert result.status == "error"
 assert "already exists" in result.content.lower()
 print("  PASS")

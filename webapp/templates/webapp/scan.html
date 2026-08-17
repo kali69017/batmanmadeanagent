@@ -1,0 +1,38 @@
+{% extends "webapp/base.html" %}{% load static %}
+{% block title %}Scan — Reflex (staff){% endblock %}
+{% block content %}
+<div class="h-screen flex flex-col">
+  <header class="app-header">
+    <div class="flex items-center gap-2">
+      <span class="app-brand">Reflex</span>
+      <span class="text-xs" style="color:var(--warning)">staff · scan</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="{% url 'dashboard' %}" class="btn-ghost text-xs">← Back to app</a>
+      <form method="post" action="{% url 'logout' %}">{% csrf_token %}
+        <button type="submit" class="btn-ghost text-xs">Log out</button>
+      </form>
+    </div>
+  </header>
+
+  <main class="flex-1 min-h-0 overflow-y-auto">
+    <div class="home-container">
+      <h1 class="pick-detail-ticker mb-3">Run a scan</h1>
+      <p class="text-sm text-muted mb-6">Manual override for when you need to rerun a scan outside the cron schedule.</p>
+
+      <div class="flex gap-2 mb-4">
+        <button id="scan-full" class="scan-btn btn btn-primary" data-mode="full">Full scan</button>
+        <button id="scan-fasset" class="scan-btn btn btn-secondary" data-mode="fasset">Fasset scan</button>
+      </div>
+
+      <div class="ticker-strip mb-4" aria-live="polite">
+        <span id="ticker-dot" class="ticker-dot idle"></span>
+        <span id="scan-status" class="truncate">idle</span>
+      </div>
+
+      <div id="scan-log" class="scan-log"></div>
+    </div>
+  </main>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{% static 'webapp/scan.js' %}"></script>{% endblock %}

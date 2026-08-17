@@ -20,6 +20,7 @@ _combined_history_df: pd.DataFrame | None = None
 _intraday_cache: dict = {}
 _intraday_ohlcv_cache: dict = {}
 
+
 # ---------------------------------------------------------------------------
 # Intraday cache persistence
 # ---------------------------------------------------------------------------
@@ -28,7 +29,9 @@ def _load_intraday_cache():
     try:
         if not config.INTRADAY_CACHE_FILE.exists():
             return
-        age_min = (datetime.now().timestamp() - config.INTRADAY_CACHE_FILE.stat().st_mtime) / 60
+        age_min = (
+            datetime.now().timestamp() - config.INTRADAY_CACHE_FILE.stat().st_mtime
+        ) / 60
         if age_min > config.INTRADAY_CACHE_MINUTES:
             config.INTRADAY_CACHE_FILE.unlink(missing_ok=True)
             return
@@ -46,21 +49,27 @@ def _load_intraday_cache():
 def _save_intraday_cache():
     try:
         with open(config.INTRADAY_CACHE_FILE, "wb") as f:
-            pickle.dump({
-                "tool_cache": _intraday_cache,
-                "ohlcv_cache": {
-                    k: {
-                        "fetched_at": v["fetched_at"],
-                        "df": v["df"].to_dict() if hasattr(v["df"], "to_dict") else {},
-                    }
-                    for k, v in _intraday_ohlcv_cache.items()
+            pickle.dump(
+                {
+                    "tool_cache": _intraday_cache,
+                    "ohlcv_cache": {
+                        k: {
+                            "fetched_at": v["fetched_at"],
+                            "df": (
+                                v["df"].to_dict() if hasattr(v["df"], "to_dict") else {}
+                            ),
+                        }
+                        for k, v in _intraday_ohlcv_cache.items()
+                    },
                 },
-            }, f)
+                f,
+            )
     except Exception:
         pass
 
 
 _load_intraday_cache()
+
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -69,8 +78,7 @@ def _check_symbol(symbol: str) -> str:
     sym = symbol.strip().upper()
     if sym not in config.WATCHLIST:
         raise ValueError(
-            f"'{symbol}' is not in the approved watchlist. "
-            f"Allowed symbols: {', '.join(config.WATCHLIST)}"
+            f"'{symbol}' is not in the approved watchlist ({len(config.WATCHLIST)} tickers)."
         )
     return sym
 
@@ -94,6 +102,7 @@ def _tool_guard(fn):
             return json.dumps({"error": str(e)})
         except Exception as e:
             return json.dumps({"error": f"Unexpected error in {fn.__name__}: {e}"})
+
     return wrapper
 
 
@@ -104,7 +113,9 @@ def _cache_file_path(symbol: str) -> Path:
     return config.CACHE_DIR / f"{symbol}.json"
 
 
-def _cache_is_stale(path: Path, max_age_hours: float = config.CACHE_MAX_AGE_HOURS) -> bool:
+def _cache_is_stale(
+    path: Path, max_age_hours: float = config.CACHE_MAX_AGE_HOURS
+) -> bool:
     if not path.exists():
         return True
     age_hours = (datetime.now().timestamp() - path.stat().st_mtime) / 3600
@@ -147,7 +158,9 @@ def _load_combined_history() -> pd.DataFrame | None:
     if not config.COMBINED_HISTORY_PATH.exists():
         _combined_history_df = None
         return None
-    if _cache_is_stale(config.COMBINED_HISTORY_PATH, max_age_hours=config.HISTORY_CSV_MAX_AGE_HOURS):
+    if _cache_is_stale(
+        config.COMBINED_HISTORY_PATH, max_age_hours=config.HISTORY_CSV_MAX_AGE_HOURS
+    ):
         _combined_history_df = None
         return None
     if _combined_history_df is not None:
@@ -169,7 +182,12 @@ def _history_from_cache(symbol: str, period: str) -> pd.DataFrame | None:
     if sym_df.empty:
         return None
     period_days = {
-        "1mo": 30, "3mo": 91, "6mo": 182, "1y": 365, "2y": 730, "5y": 1825,
+        "1mo": 30,
+        "3mo": 91,
+        "6mo": 182,
+        "1y": 365,
+        "2y": 730,
+        "5y": 1825,
     }
     if period == "max":
         return sym_df.set_index("Date")
@@ -201,7 +219,9 @@ def _intraday_ohlcv_set(symbol: str, period: str, df: pd.DataFrame) -> None:
     }
 
 
-def _get_ohlcv(symbol: str, period: str = "1y", force_refresh: bool = False) -> pd.DataFrame | None:
+def _get_ohlcv(
+    symbol: str, period: str = "1y", force_refresh: bool = False
+) -> pd.DataFrame | None:
     cached_ohlcv = _intraday_ohlcv_get(symbol, period)
     if cached_ohlcv is not None:
         return cached_ohlcv
@@ -223,7 +243,9 @@ def _get_ohlcv(symbol: str, period: str = "1y", force_refresh: bool = False) -> 
 
 def _get_benchmark_ohlcv(benchmark: str, period: str = "1y") -> pd.DataFrame | None:
     try:
-        hist = yf.Ticker(benchmark).history(period=period, interval="1d", auto_adjust=True)
+        hist = yf.Ticker(benchmark).history(
+            period=period, interval="1d", auto_adjust=True
+        )
     except Exception:
         return None
     if hist is None or hist.empty:
@@ -236,7 +258,9 @@ def _get_benchmark_ohlcv(benchmark: str, period: str = "1y") -> pd.DataFrame | N
 # Tool: Price data
 # ---------------------------------------------------------------------------
 @_tool_guard
-def get_price_data(symbol: str, period: str = "6mo", force_refresh: bool = False) -> str:
+def get_price_data(
+    symbol: str, period: str = "6mo", force_refresh: bool = False
+) -> str:
     """Get OHLCV price history and return statistics for a single symbol."""
     sym = _check_symbol(symbol)
     source = "live"
@@ -251,7 +275,9 @@ def get_price_data(symbol: str, period: str = "6mo", force_refresh: bool = False
             hist = cached_hist
             yr_hist = _history_from_cache(sym, "1y")
             if yr_hist is None or yr_hist.empty:
-                yr_hist = yf.Ticker(sym).history(period="1y", interval="1d", auto_adjust=True)
+                yr_hist = yf.Ticker(sym).history(
+                    period="1y", interval="1d", auto_adjust=True
+                )
             else:
                 yr_hist = yr_hist
             source = "cache"
@@ -264,10 +290,14 @@ def get_price_data(symbol: str, period: str = "6mo", force_refresh: bool = False
         hist = ticker.history(period=period, interval="1d", auto_adjust=True)
         yr_hist = ticker.history(period="1y", interval="1d", auto_adjust=True)
     if hist.empty:
-        return json.dumps({"symbol": sym, "error": "No price data returned.", "source": source})
+        return json.dumps(
+            {"symbol": sym, "error": "No price data returned.", "source": source}
+        )
     close = hist["Close"].dropna()
     if close.empty:
-        return json.dumps({"symbol": sym, "error": "No valid close prices.", "source": source})
+        return json.dumps(
+            {"symbol": sym, "error": "No valid close prices.", "source": source}
+        )
     daily_returns = close.pct_change().dropna()
     period_return_pct = (close.iloc[-1] / close.iloc[0] - 1) * 100
     annualized_vol_pct = daily_returns.std() * np.sqrt(252) * 100
@@ -283,9 +313,12 @@ def get_price_data(symbol: str, period: str = "6mo", force_refresh: bool = False
         "52wk_low": round(fifty_two_wk_low, 2) if fifty_two_wk_low else None,
         "pct_off_52wk_high": (
             round((close.iloc[-1] / fifty_two_wk_high - 1) * 100, 2)
-            if fifty_two_wk_high else None
+            if fifty_two_wk_high
+            else None
         ),
-        "avg_volume_20d": int(hist["Volume"].tail(20).mean()) if len(hist) >= 20 else None,
+        "avg_volume_20d": (
+            int(hist["Volume"].tail(20).mean()) if len(hist) >= 20 else None
+        ),
         "as_of": str(close.index[-1].date()),
         "source": source,
     }
@@ -309,10 +342,13 @@ def _add_upside_fields(result: dict, info: dict) -> dict:
             pct = (target_val / current_price - 1) * 100
             result[upside_key] = round(pct, 1)
             tag = "upside" if pct >= 0 else "downside"
-            label_target = "mean" if "Mean" in target_key else "high" if "High" in target_key else "low"
+            label_target = (
+                "mean"
+                if "Mean" in target_key
+                else "high" if "High" in target_key else "low"
+            )
             result[f"{upside_key}_label"] = (
-                f"{tag} of {abs(round(pct, 1))}% "
-                f"to analyst {label_target} target"
+                f"{tag} of {abs(round(pct, 1))}% " f"to analyst {label_target} target"
             )
         else:
             result[upside_key] = None
@@ -372,19 +408,26 @@ def get_technicals(symbol: str, force_refresh: bool = False) -> str:
         hist = yf.Ticker(sym).history(period="1y", interval="1d", auto_adjust=True)
         source = "live"
     if hist.empty or len(hist) < 50:
-        return json.dumps({"symbol": sym, "error": "Insufficient price history.", "source": source})
+        return json.dumps(
+            {"symbol": sym, "error": "Insufficient price history.", "source": source}
+        )
     close = hist["Close"].dropna()
     if close.empty:
-        return json.dumps({"symbol": sym, "error": "No valid close prices.", "source": source})
+        return json.dumps(
+            {"symbol": sym, "error": "No valid close prices.", "source": source}
+        )
     high, low = hist["High"], hist["Low"]
     import pandas_ta as ta
+
     sma20 = ta.sma(close, length=20).iloc[-1]
     sma50 = ta.sma(close, length=50).iloc[-1]
     sma200 = ta.sma(close, length=200).iloc[-1] if len(close) >= 200 else None
     rsi_series = ta.rsi(close, length=14)
     rsi = rsi_series.iloc[-1] if rsi_series is not None else None
     macd_result = ta.macd(close, fast=12, slow=26, signal=9)
-    macd_hist = macd_result["MACDh_12_26_9"].iloc[-1] if macd_result is not None else None
+    macd_hist = (
+        macd_result["MACDh_12_26_9"].iloc[-1] if macd_result is not None else None
+    )
     price = close.iloc[-1]
     signals = []
     if price > sma20:
@@ -433,24 +476,63 @@ def get_trend_indicators(symbol: str, force_refresh: bool = False) -> str:
     if hist is None or len(hist) < 30:
         return json.dumps({"symbol": sym, "error": "Insufficient OHLCV history."})
     import pandas_ta as ta
-    o, h, l, c, v = hist["Open"], hist["High"], hist["Low"], hist["Close"], hist["Volume"]
+
+    o, h, l, c, v = (
+        hist["Open"],
+        hist["High"],
+        hist["Low"],
+        hist["Close"],
+        hist["Volume"],
+    )
     ema12 = ta.ema(c, length=12)
     ema26 = ta.ema(c, length=26)
     macd_result = ta.macd(c, fast=12, slow=26, signal=9)
-    macd_line = macd_result["MACD_12_26_9"] if macd_result is not None else pd.Series(index=c.index, dtype=float)
-    macd_signal = macd_result["MACDs_12_26_9"] if macd_result is not None else pd.Series(index=c.index, dtype=float)
-    macd_hist = macd_result["MACDh_12_26_9"] if macd_result is not None else pd.Series(index=c.index, dtype=float)
+    macd_line = (
+        macd_result["MACD_12_26_9"]
+        if macd_result is not None
+        else pd.Series(index=c.index, dtype=float)
+    )
+    macd_signal = (
+        macd_result["MACDs_12_26_9"]
+        if macd_result is not None
+        else pd.Series(index=c.index, dtype=float)
+    )
+    macd_hist = (
+        macd_result["MACDh_12_26_9"]
+        if macd_result is not None
+        else pd.Series(index=c.index, dtype=float)
+    )
     adx_result = ta.adx(h, l, c, length=14)
-    adx14 = adx_result["ADX_14"] if adx_result is not None else pd.Series(index=c.index, dtype=float)
+    adx14 = (
+        adx_result["ADX_14"]
+        if adx_result is not None
+        else pd.Series(index=c.index, dtype=float)
+    )
     psar_result = ta.psar(h, l, c, af=0.02, max_af=0.2)
     if psar_result is not None:
-        sar_col = [col for col in psar_result.columns if "PSAR" in col.upper() or "sar" in col.lower()]
-        psar = psar_result[sar_col[0]] if sar_col else pd.Series(index=c.index, dtype=float)
+        sar_col = [
+            col
+            for col in psar_result.columns
+            if "PSAR" in col.upper() or "sar" in col.lower()
+        ]
+        psar = (
+            psar_result[sar_col[0]]
+            if sar_col
+            else pd.Series(index=c.index, dtype=float)
+        )
     else:
         psar = pd.Series(index=c.index, dtype=float)
     aroon_result = ta.aroon(h, l, length=25)
-    aroon_up = aroon_result["AROONU_25"] if aroon_result is not None else pd.Series(index=c.index, dtype=float)
-    aroon_down = aroon_result["AROOND_25"] if aroon_result is not None else pd.Series(index=c.index, dtype=float)
+    aroon_up = (
+        aroon_result["AROONU_25"]
+        if aroon_result is not None
+        else pd.Series(index=c.index, dtype=float)
+    )
+    aroon_down = (
+        aroon_result["AROOND_25"]
+        if aroon_result is not None
+        else pd.Series(index=c.index, dtype=float)
+    )
     result = {
         "symbol": sym,
         "ema12": round(float(ema12.iloc[-1]), 2),
@@ -458,15 +540,30 @@ def get_trend_indicators(symbol: str, force_refresh: bool = False) -> str:
         "macd_line": round(float(macd_line.iloc[-1]), 3),
         "macd_signal": round(float(macd_signal.iloc[-1]), 3),
         "macd_histogram": round(float(macd_hist.iloc[-1]), 3),
-        "adx_14": round(float(adx14.iloc[-1]), 1) if not pd.isna(adx14.iloc[-1]) else None,
+        "adx_14": (
+            round(float(adx14.iloc[-1]), 1) if not pd.isna(adx14.iloc[-1]) else None
+        ),
         "adx_trend_strength": (
-            "strong trend" if not pd.isna(adx14.iloc[-1]) and adx14.iloc[-1] > 25
+            "strong trend"
+            if not pd.isna(adx14.iloc[-1]) and adx14.iloc[-1] > 25
             else "weak/no trend" if not pd.isna(adx14.iloc[-1]) else None
         ),
         "parabolic_sar": round(float(psar.iloc[-1]), 2),
-        "sar_signal": "bullish (price above SAR)" if c.iloc[-1] > psar.iloc[-1] else "bearish (price below SAR)",
-        "aroon_up_25": round(float(aroon_up.iloc[-1]), 1) if not pd.isna(aroon_up.iloc[-1]) else None,
-        "aroon_down_25": round(float(aroon_down.iloc[-1]), 1) if not pd.isna(aroon_down.iloc[-1]) else None,
+        "sar_signal": (
+            "bullish (price above SAR)"
+            if c.iloc[-1] > psar.iloc[-1]
+            else "bearish (price below SAR)"
+        ),
+        "aroon_up_25": (
+            round(float(aroon_up.iloc[-1]), 1)
+            if not pd.isna(aroon_up.iloc[-1])
+            else None
+        ),
+        "aroon_down_25": (
+            round(float(aroon_down.iloc[-1]), 1)
+            if not pd.isna(aroon_down.iloc[-1])
+            else None
+        ),
     }
     _intraday_set(sym, "trend_indicators", result)
     return json.dumps(result)
@@ -487,38 +584,71 @@ def get_momentum_indicators(symbol: str, force_refresh: bool = False) -> str:
     if hist is None or len(hist) < 30:
         return json.dumps({"symbol": sym, "error": "Insufficient OHLCV history."})
     import pandas_ta as ta
-    o, h, l, c, v = hist["Open"], hist["High"], hist["Low"], hist["Close"], hist["Volume"]
+
+    o, h, l, c, v = (
+        hist["Open"],
+        hist["High"],
+        hist["Low"],
+        hist["Close"],
+        hist["Volume"],
+    )
     stoch_result = ta.stoch(h, l, c, k=14, d=3)
-    pct_k = stoch_result["STOCHk_14_3_3"] if stoch_result is not None else pd.Series(index=c.index, dtype=float)
-    pct_d = stoch_result["STOCHd_14_3_3"] if stoch_result is not None else pd.Series(index=c.index, dtype=float)
+    pct_k = (
+        stoch_result["STOCHk_14_3_3"]
+        if stoch_result is not None
+        else pd.Series(index=c.index, dtype=float)
+    )
+    pct_d = (
+        stoch_result["STOCHd_14_3_3"]
+        if stoch_result is not None
+        else pd.Series(index=c.index, dtype=float)
+    )
     cci20 = ta.cci(h, l, c, length=20)
     williams_r = ta.willr(h, l, c, length=14)
     roc12 = ta.roc(c, length=12)
     momentum10 = ta.mom(c, length=10)
     stoch_rsi_result = ta.stochrsi(c, length=14)
-    stoch_rsi = stoch_rsi_result["STOCHRSIk_14_14_3_3"] if stoch_rsi_result is not None else pd.Series(index=c.index, dtype=float)
+    stoch_rsi = (
+        stoch_rsi_result["STOCHRSIk_14_14_3_3"]
+        if stoch_rsi_result is not None
+        else pd.Series(index=c.index, dtype=float)
+    )
+
     def safe_round(x, nd=2):
         return round(float(x), nd) if not pd.isna(x) else None
+
     result = {
         "symbol": sym,
         "stoch_pct_k": safe_round(pct_k.iloc[-1], 1),
         "stoch_pct_d": safe_round(pct_d.iloc[-1], 1),
         "stoch_signal": (
-            "overbought" if not pd.isna(pct_k.iloc[-1]) and pct_k.iloc[-1] > 80
-            else "oversold" if not pd.isna(pct_k.iloc[-1]) and pct_k.iloc[-1] < 20
-            else "neutral"
+            "overbought"
+            if not pd.isna(pct_k.iloc[-1]) and pct_k.iloc[-1] > 80
+            else (
+                "oversold"
+                if not pd.isna(pct_k.iloc[-1]) and pct_k.iloc[-1] < 20
+                else "neutral"
+            )
         ),
         "cci_20": safe_round(cci20.iloc[-1], 1),
         "cci_signal": (
-            "overbought" if not pd.isna(cci20.iloc[-1]) and cci20.iloc[-1] > 100
-            else "oversold" if not pd.isna(cci20.iloc[-1]) and cci20.iloc[-1] < -100
-            else "neutral"
+            "overbought"
+            if not pd.isna(cci20.iloc[-1]) and cci20.iloc[-1] > 100
+            else (
+                "oversold"
+                if not pd.isna(cci20.iloc[-1]) and cci20.iloc[-1] < -100
+                else "neutral"
+            )
         ),
         "williams_r_14": safe_round(williams_r.iloc[-1], 1),
         "williams_r_signal": (
-            "overbought" if not pd.isna(williams_r.iloc[-1]) and williams_r.iloc[-1] > -20
-            else "oversold" if not pd.isna(williams_r.iloc[-1]) and williams_r.iloc[-1] < -80
-            else "neutral"
+            "overbought"
+            if not pd.isna(williams_r.iloc[-1]) and williams_r.iloc[-1] > -20
+            else (
+                "oversold"
+                if not pd.isna(williams_r.iloc[-1]) and williams_r.iloc[-1] < -80
+                else "neutral"
+            )
         ),
         "roc_12": safe_round(roc12.iloc[-1], 2),
         "momentum_10": safe_round(momentum10.iloc[-1], 2),
@@ -543,7 +673,14 @@ def get_volatility_indicators(symbol: str, force_refresh: bool = False) -> str:
     if hist is None or len(hist) < 30:
         return json.dumps({"symbol": sym, "error": "Insufficient OHLCV history."})
     import pandas_ta as ta
-    o, h, l, c, v = hist["Open"], hist["High"], hist["Low"], hist["Close"], hist["Volume"]
+
+    o, h, l, c, v = (
+        hist["Open"],
+        hist["High"],
+        hist["Low"],
+        hist["Close"],
+        hist["Volume"],
+    )
     bb_result = ta.bbands(c, length=20, lower_std=2, upper_std=2)
     if bb_result is not None:
         bb_upper = bb_result["BBU_20_2_2"]
@@ -567,8 +704,10 @@ def get_volatility_indicators(symbol: str, force_refresh: bool = False) -> str:
     else:
         donchian_upper = donchian_lower = pd.Series(index=c.index, dtype=float)
     std20 = c.rolling(20).std()
+
     def safe_round(x, nd=2):
         return round(float(x), nd) if not pd.isna(x) else None
+
     result = {
         "symbol": sym,
         "price": safe_round(c.iloc[-1]),
@@ -577,12 +716,20 @@ def get_volatility_indicators(symbol: str, force_refresh: bool = False) -> str:
         "bollinger_lower": safe_round(bb_lower.iloc[-1]),
         "bollinger_pct_b": safe_round(bb_pct_b.iloc[-1], 3),
         "bollinger_signal": (
-            "near/above upper band" if not pd.isna(bb_pct_b.iloc[-1]) and bb_pct_b.iloc[-1] > 0.95
-            else "near/below lower band" if not pd.isna(bb_pct_b.iloc[-1]) and bb_pct_b.iloc[-1] < 0.05
-            else "mid-range"
+            "near/above upper band"
+            if not pd.isna(bb_pct_b.iloc[-1]) and bb_pct_b.iloc[-1] > 0.95
+            else (
+                "near/below lower band"
+                if not pd.isna(bb_pct_b.iloc[-1]) and bb_pct_b.iloc[-1] < 0.05
+                else "mid-range"
+            )
         ),
         "atr_14": safe_round(atr14.iloc[-1]),
-        "atr_pct_of_price": safe_round(100 * atr14.iloc[-1] / c.iloc[-1], 2) if not pd.isna(atr14.iloc[-1]) else None,
+        "atr_pct_of_price": (
+            safe_round(100 * atr14.iloc[-1] / c.iloc[-1], 2)
+            if not pd.isna(atr14.iloc[-1])
+            else None
+        ),
         "keltner_upper": safe_round(kc_upper.iloc[-1]),
         "keltner_lower": safe_round(kc_lower.iloc[-1]),
         "rolling_stddev_20": safe_round(std20.iloc[-1]),
@@ -608,8 +755,16 @@ def get_volume_indicators(symbol: str, force_refresh: bool = False) -> str:
     if hist is None or len(hist) < 30:
         return json.dumps({"symbol": sym, "error": "Insufficient OHLCV history."})
     import pandas_ta as ta
-    o, h, l, c, v = hist["Open"], hist["High"], hist["Low"], hist["Close"], hist["Volume"]
+
+    o, h, l, c, v = (
+        hist["Open"],
+        hist["High"],
+        hist["Low"],
+        hist["Close"],
+        hist["Volume"],
+    )
     obv = ta.obv(c, v)
+
     def _obv_change_pct(periods: int):
         if len(obv) <= periods:
             return None
@@ -618,6 +773,7 @@ def get_volume_indicators(symbol: str, force_refresh: bool = False) -> str:
         if past == 0:
             return None
         return 100 * (now - past) / abs(past)
+
     def _price_change_pct(periods: int):
         if len(c) <= periods:
             return None
@@ -626,15 +782,18 @@ def get_volume_indicators(symbol: str, force_refresh: bool = False) -> str:
         if past == 0:
             return None
         return 100 * (now - past) / past
+
     obv_chg_5d = _obv_change_pct(5)
     obv_chg_20d = _obv_change_pct(20)
     obv_chg_60d = _obv_change_pct(60)
     obv_chg_6mo = _obv_change_pct(min(126, len(obv) - 1))
     price_chg_6mo = _price_change_pct(min(126, len(c) - 1))
+
     def _trend_label(chg):
         if chg is None:
             return None
         return "rising" if chg > 0 else "falling" if chg < 0 else "flat"
+
     divergence = None
     if obv_chg_6mo is not None and price_chg_6mo is not None:
         if price_chg_6mo > 5 and obv_chg_6mo < 0:
@@ -642,17 +801,25 @@ def get_volume_indicators(symbol: str, force_refresh: bool = False) -> str:
         elif price_chg_6mo < -5 and obv_chg_6mo > 0:
             divergence = "bullish divergence: price down over 6mo while OBV up — selloff not confirmed by cumulative volume"
         else:
-            divergence = "no major divergence: OBV and price direction broadly agree over 6mo"
+            divergence = (
+                "no major divergence: OBV and price direction broadly agree over 6mo"
+            )
     typical_price = (h + l + c) / 3
-    vwap20 = ta.vwap(h, l, c, v).rolling(20).mean() if hasattr(ta, 'vwap') else (typical_price * v).rolling(20).sum() / v.rolling(20).sum()
+    vwap20 = (
+        ta.vwap(h, l, c, v).rolling(20).mean()
+        if hasattr(ta, "vwap")
+        else (typical_price * v).rolling(20).sum() / v.rolling(20).sum()
+    )
     mfi14 = ta.mfi(h, l, c, v, length=14)
     cmf20 = ta.cmf(h, l, c, v, length=20)
     ad_line = ta.ad(h, l, c, v)
     vol_sma5 = v.rolling(5).mean()
     vol_sma20 = v.rolling(20).mean()
     vol_osc = 100 * (vol_sma5 - vol_sma20) / vol_sma20
+
     def safe_round(x, nd=2):
         return round(float(x), nd) if not pd.isna(x) else None
+
     result = {
         "symbol": sym,
         "obv": safe_round(obv.iloc[-1], 0),
@@ -660,19 +827,31 @@ def get_volume_indicators(symbol: str, force_refresh: bool = False) -> str:
         "obv_trend_20d": _trend_label(obv_chg_20d),
         "obv_trend_60d": _trend_label(obv_chg_60d),
         "obv_trend_6mo": _trend_label(obv_chg_6mo),
-        "obv_pct_change_6mo": round(obv_chg_6mo, 1) if obv_chg_6mo is not None else None,
-        "price_pct_change_6mo": round(price_chg_6mo, 1) if price_chg_6mo is not None else None,
+        "obv_pct_change_6mo": (
+            round(obv_chg_6mo, 1) if obv_chg_6mo is not None else None
+        ),
+        "price_pct_change_6mo": (
+            round(price_chg_6mo, 1) if price_chg_6mo is not None else None
+        ),
         "obv_price_divergence": divergence,
         "vwap_20d": safe_round(vwap20.iloc[-1]),
         "price_vs_vwap": "above VWAP" if c.iloc[-1] > vwap20.iloc[-1] else "below VWAP",
         "mfi_14": safe_round(mfi14.iloc[-1], 1),
         "mfi_signal": (
-            "overbought" if not pd.isna(mfi14.iloc[-1]) and mfi14.iloc[-1] > 80
-            else "oversold" if not pd.isna(mfi14.iloc[-1]) and mfi14.iloc[-1] < 20
-            else "neutral"
+            "overbought"
+            if not pd.isna(mfi14.iloc[-1]) and mfi14.iloc[-1] > 80
+            else (
+                "oversold"
+                if not pd.isna(mfi14.iloc[-1]) and mfi14.iloc[-1] < 20
+                else "neutral"
+            )
         ),
         "chaikin_money_flow_20": safe_round(cmf20.iloc[-1], 3),
-        "cmf_signal": "accumulation" if not pd.isna(cmf20.iloc[-1]) and cmf20.iloc[-1] > 0 else "distribution",
+        "cmf_signal": (
+            "accumulation"
+            if not pd.isna(cmf20.iloc[-1]) and cmf20.iloc[-1] > 0
+            else "distribution"
+        ),
         "accumulation_distribution_line": safe_round(ad_line.iloc[-1], 0),
         "volume_oscillator_5_20": safe_round(vol_osc.iloc[-1], 1),
     }
@@ -704,14 +883,26 @@ def get_pivot_points(symbol: str, force_refresh: bool = False) -> str:
     s2 = pivot - (ph - pl)
     r3 = ph + 2 * (pivot - pl)
     s3 = pl - 2 * (ph - pivot)
-    levels = {"S3": s3, "S2": s2, "S1": s1, "Pivot": pivot, "R1": r1, "R2": r2, "R3": r3}
+    levels = {
+        "S3": s3,
+        "S2": s2,
+        "S1": s1,
+        "Pivot": pivot,
+        "R1": r1,
+        "R2": r2,
+        "R3": r3,
+    }
     nearest_level = min(levels.items(), key=lambda kv: abs(kv[1] - current_price))
     result = {
         "symbol": sym,
         "current_price": round(current_price, 2),
         "pivot": round(pivot, 2),
-        "r1": round(r1, 2), "r2": round(r2, 2), "r3": round(r3, 2),
-        "s1": round(s1, 2), "s2": round(s2, 2), "s3": round(s3, 2),
+        "r1": round(r1, 2),
+        "r2": round(r2, 2),
+        "r3": round(r3, 2),
+        "s1": round(s1, 2),
+        "s2": round(s2, 2),
+        "s3": round(s3, 2),
         "nearest_level": nearest_level[0],
         "position": "above pivot" if current_price > pivot else "below pivot",
     }
@@ -723,7 +914,12 @@ def get_pivot_points(symbol: str, force_refresh: bool = False) -> str:
 # Tool: Relative strength vs benchmark
 # ---------------------------------------------------------------------------
 @_tool_guard
-def get_relative_strength(symbol: str, benchmark: str = "SPY", period: str = "6mo", force_refresh: bool = False) -> str:
+def get_relative_strength(
+    symbol: str,
+    benchmark: str = "SPY",
+    period: str = "6mo",
+    force_refresh: bool = False,
+) -> str:
     """Compare a symbol's performance against a benchmark index."""
     sym = _check_symbol(symbol)
     bench = _check_benchmark(benchmark)
@@ -736,26 +932,42 @@ def get_relative_strength(symbol: str, benchmark: str = "SPY", period: str = "6m
     if not force_refresh:
         sym_hist = _history_from_cache(sym, period)
     if sym_hist is None or sym_hist.empty:
-        sym_hist = yf.Ticker(sym).history(period=period, interval="1d", auto_adjust=True)
+        sym_hist = yf.Ticker(sym).history(
+            period=period, interval="1d", auto_adjust=True
+        )
     if sym_hist is None or sym_hist.empty:
         return json.dumps({"symbol": sym, "error": "No price data for symbol."})
     sym_hist = sym_hist.dropna(subset=["Close"])
     bench_hist = _get_benchmark_ohlcv(bench, period=period)
     if bench_hist is None or bench_hist.empty:
-        return json.dumps({"symbol": sym, "benchmark": bench, "error": "No price data for benchmark."})
+        return json.dumps(
+            {"symbol": sym, "benchmark": bench, "error": "No price data for benchmark."}
+        )
     sym_close = sym_hist["Close"]
     bench_close = bench_hist["Close"]
     sym_close.index = pd.to_datetime(sym_close.index).tz_localize(None).normalize()
     bench_close.index = pd.to_datetime(bench_close.index).tz_localize(None).normalize()
-    aligned = pd.concat([sym_close.rename("sym"), bench_close.rename("bench")], axis=1, join="inner").dropna()
+    aligned = pd.concat(
+        [sym_close.rename("sym"), bench_close.rename("bench")], axis=1, join="inner"
+    ).dropna()
     if len(aligned) < 10:
-        return json.dumps({"symbol": sym, "benchmark": bench, "error": "Insufficient overlapping history to compare."})
+        return json.dumps(
+            {
+                "symbol": sym,
+                "benchmark": bench,
+                "error": "Insufficient overlapping history to compare.",
+            }
+        )
     sym_return_pct = (sym_close.iloc[-1] / sym_close.iloc[0] - 1) * 100
     bench_return_pct = (bench_close.iloc[-1] / bench_close.iloc[0] - 1) * 100
     excess_return_pct = sym_return_pct - bench_return_pct
-    rs_line = (aligned["sym"] / aligned["bench"])
+    rs_line = aligned["sym"] / aligned["bench"]
     rs_line_normalized = 100 * rs_line / rs_line.iloc[0]
-    rs_trend_5d = "rising" if rs_line_normalized.iloc[-1] > rs_line_normalized.iloc[-6] else "falling" if len(rs_line_normalized) > 6 else None
+    rs_trend_5d = (
+        "rising"
+        if rs_line_normalized.iloc[-1] > rs_line_normalized.iloc[-6]
+        else "falling" if len(rs_line_normalized) > 6 else None
+    )
     read = (
         f"{sym} {'outperformed' if excess_return_pct > 0 else 'underperformed'} "
         f"{bench} by {abs(round(excess_return_pct, 1))} percentage points over {period}."
@@ -779,7 +991,9 @@ def get_relative_strength(symbol: str, benchmark: str = "SPY", period: str = "6m
 # Tool: Risk-adjusted returns
 # ---------------------------------------------------------------------------
 @_tool_guard
-def get_risk_adjusted_returns(symbol: str, period: str = "1y", force_refresh: bool = False) -> str:
+def get_risk_adjusted_returns(
+    symbol: str, period: str = "1y", force_refresh: bool = False
+) -> str:
     """Compute risk-adjusted return metrics: Sharpe, Sortino, max drawdown, Calmar."""
     sym = _check_symbol(symbol)
     ra_cache_key = f"risk_adjusted_{period}"
@@ -804,14 +1018,17 @@ def get_risk_adjusted_returns(symbol: str, period: str = "1y", force_refresh: bo
     daily_rf = config.RISK_FREE_RATE_ANNUAL / trading_days_per_year
     excess_daily_returns = daily_returns - daily_rf
     sharpe = (
-        (excess_daily_returns.mean() / excess_daily_returns.std()) * np.sqrt(trading_days_per_year)
-        if excess_daily_returns.std() != 0 else None
+        (excess_daily_returns.mean() / excess_daily_returns.std())
+        * np.sqrt(trading_days_per_year)
+        if excess_daily_returns.std() != 0
+        else None
     )
     downside_returns = excess_daily_returns[excess_daily_returns < 0]
     downside_std = downside_returns.std()
     sortino = (
         (excess_daily_returns.mean() / downside_std) * np.sqrt(trading_days_per_year)
-        if downside_std and downside_std != 0 else None
+        if downside_std and downside_std != 0
+        else None
     )
     cumulative = (1 + daily_returns).cumprod()
     running_max = cumulative.cummax()
@@ -819,10 +1036,13 @@ def get_risk_adjusted_returns(symbol: str, period: str = "1y", force_refresh: bo
     max_drawdown_pct = drawdown.min() * 100
     calmar = (
         annualized_return / abs(max_drawdown_pct / 100)
-        if max_drawdown_pct != 0 else None
+        if max_drawdown_pct != 0
+        else None
     )
+
     def safe_round(x, nd=2):
         return round(float(x), nd) if x is not None and not pd.isna(x) else None
+
     result = {
         "symbol": sym,
         "period": period,
@@ -837,9 +1057,19 @@ def get_risk_adjusted_returns(symbol: str, period: str = "1y", force_refresh: bo
         "risk_free_rate_used_pct": round(config.RISK_FREE_RATE_ANNUAL * 100, 2),
         "read": (
             f"Sharpe {safe_round(sharpe,2)}: "
-            + ("strong risk-adjusted return" if sharpe and sharpe > 1 else
-               "weak/negative risk-adjusted return" if sharpe and sharpe < 0 else
-               "modest risk-adjusted return" if sharpe is not None else "unavailable")
+            + (
+                "strong risk-adjusted return"
+                if sharpe and sharpe > 1
+                else (
+                    "weak/negative risk-adjusted return"
+                    if sharpe and sharpe < 0
+                    else (
+                        "modest risk-adjusted return"
+                        if sharpe is not None
+                        else "unavailable"
+                    )
+                )
+            )
             + f". Max drawdown {safe_round(max_drawdown_pct)}% over the period."
         ),
     }
@@ -874,7 +1104,9 @@ def get_quant_factors(symbol: str, force_refresh: bool = False) -> str:
     if peg is not None:
         peg_pass = peg > 0 and peg < 1.2 and (forward_pe is None or forward_pe < 20)
         factors["peg_ratio"] = peg
-        factors["peg_signal"] = "undervalued (PEG<1.2, fwdPE<20)" if peg_pass else "expensive on PEG basis"
+        factors["peg_signal"] = (
+            "undervalued (PEG<1.2, fwdPE<20)" if peg_pass else "expensive on PEG basis"
+        )
         score += 12 if peg_pass else -12
     else:
         factors["peg_ratio"] = None
@@ -899,11 +1131,15 @@ def get_quant_factors(symbol: str, force_refresh: bool = False) -> str:
     if pfcf is not None:
         pfcf_pass = pfcf < 15
         factors["price_to_fcf"] = round(pfcf, 2)
-        factors["pfcf_signal"] = "cheap on FCF basis (P/FCF<15)" if pfcf_pass else "expensive on FCF basis"
+        factors["pfcf_signal"] = (
+            "cheap on FCF basis (P/FCF<15)" if pfcf_pass else "expensive on FCF basis"
+        )
         score += 10 if pfcf_pass else -10
     else:
         factors["price_to_fcf"] = None
-        factors["pfcf_signal"] = "unavailable (could not parse cashflow statement or FCF is negative)"
+        factors["pfcf_signal"] = (
+            "unavailable (could not parse cashflow statement or FCF is negative)"
+        )
     # MOMENTUM (bidirectional — computed separately from composite_score as of Fix 3,
     # but still returned as a field for downstream use)
     need_extra = hist is not None and len(hist) <= 252
@@ -922,8 +1158,14 @@ def get_quant_factors(symbol: str, force_refresh: bool = False) -> str:
         close = hist["Close"]
         ret_12mo = close.pct_change(252).iloc[-1]
         ret_1mo = close.pct_change(21).iloc[-1]
-        momentum_12_1 = (ret_12mo - ret_1mo) * 100 if not (pd.isna(ret_12mo) or pd.isna(ret_1mo)) else None
-        factors["momentum_12_1_pct"] = round(float(momentum_12_1), 2) if momentum_12_1 is not None else None
+        momentum_12_1 = (
+            (ret_12mo - ret_1mo) * 100
+            if not (pd.isna(ret_12mo) or pd.isna(ret_1mo))
+            else None
+        )
+        factors["momentum_12_1_pct"] = (
+            round(float(momentum_12_1), 2) if momentum_12_1 is not None else None
+        )
         if momentum_12_1 is not None and momentum_12_1 > 0:
             factors["momentum_signal"] = "positive 12-1 momentum"
         elif momentum_12_1 is not None:
@@ -932,16 +1174,22 @@ def get_quant_factors(symbol: str, force_refresh: bool = False) -> str:
             factors["momentum_signal"] = "unavailable"
     else:
         factors["momentum_12_1_pct"] = None
-        factors["momentum_signal"] = "unavailable (insufficient history, needs >252 trading days)"
+        factors["momentum_signal"] = (
+            "unavailable (insufficient history, needs >252 trading days)"
+        )
     # BREAKOUT (one-sided catalyst — absence is not bearish)
     if hist is not None and len(hist) >= 50:
         vol_ma50 = hist["Volume"].rolling(50).mean().iloc[-1]
         current_vol = hist["Volume"].iloc[-1]
         lookback = min(252, len(hist))
-        is_52wk_high = bool(hist["Close"].iloc[-1] >= hist["Close"].rolling(lookback).max().iloc[-1])
+        is_52wk_high = bool(
+            hist["Close"].iloc[-1] >= hist["Close"].rolling(lookback).max().iloc[-1]
+        )
         volume_confirmed_breakout = bool(
-            not pd.isna(vol_ma50) and vol_ma50 > 0 and
-            current_vol > (vol_ma50 * 2.5) and is_52wk_high
+            not pd.isna(vol_ma50)
+            and vol_ma50 > 0
+            and current_vol > (vol_ma50 * 2.5)
+            and is_52wk_high
         )
         factors["volume_confirmed_52wk_breakout"] = volume_confirmed_breakout
         if volume_confirmed_breakout:
@@ -1025,7 +1273,10 @@ def get_technical_analysis(symbol: str, force_refresh: bool = False) -> str:
     sym = _check_symbol(symbol)
     result = {"symbol": sym, "source": None}
     tool_calls = [
-        (get_price_data, {"symbol": sym, "period": "6mo", "force_refresh": force_refresh}),
+        (
+            get_price_data,
+            {"symbol": sym, "period": "6mo", "force_refresh": force_refresh},
+        ),
         (get_technicals, {"symbol": sym, "force_refresh": force_refresh}),
         (get_trend_indicators, {"symbol": sym, "force_refresh": force_refresh}),
         (get_momentum_indicators, {"symbol": sym, "force_refresh": force_refresh}),
@@ -1052,10 +1303,14 @@ def get_technical_analysis(symbol: str, force_refresh: bool = False) -> str:
 # Tool: Cross-sectional comparison / ranking
 # ---------------------------------------------------------------------------
 @_tool_guard
-def compare_symbols(symbols: list[str] | None = None, metric: str = "period_return_pct", force_refresh: bool = False) -> str:
+def compare_symbols(
+    symbols: list[str] | None = None,
+    metric: str = "period_return_pct",
+    force_refresh: bool = False,
+) -> str:
     """Rank multiple watchlist symbols against each other on a chosen metric."""
     syms = []
-    for s in (symbols or config.WATCHLIST):
+    for s in symbols or config.WATCHLIST:
         try:
             syms.append(_check_symbol(s))
         except ValueError:
@@ -1073,25 +1328,44 @@ def compare_symbols(symbols: list[str] | None = None, metric: str = "period_retu
                     rows.append({"symbol": sym, metric: value})
             if rows:
                 rows.sort(key=lambda r: r[metric], reverse=True)
-                return json.dumps({
-                    "metric": metric,
-                    "ranking": rows,
-                    "source": "sidecar",
-                    "sidecar_generated_at": summary.get("generated_at"),
-                })
+                return json.dumps(
+                    {
+                        "metric": metric,
+                        "ranking": rows,
+                        "source": "sidecar",
+                        "sidecar_generated_at": summary.get("generated_at"),
+                    }
+                )
         except (OSError, json.JSONDecodeError):
             pass
     rows = []
     for sym in syms:
         try:
             if metric in ("period_return_pct", "annualized_volatility_pct"):
-                data = json.loads(get_price_data(sym, period="6mo", force_refresh=force_refresh))
+                data = json.loads(
+                    get_price_data(sym, period="6mo", force_refresh=force_refresh)
+                )
             elif metric in ("rsi_14", "macd_histogram"):
-                data = json.loads(get_technical_analysis(sym, force_refresh=force_refresh))
-            elif metric in ("sharpe_ratio", "sortino_ratio", "max_drawdown_pct", "calmar_ratio"):
-                data = json.loads(get_risk_adjusted_returns(sym, period="1y", force_refresh=force_refresh))
+                data = json.loads(
+                    get_technical_analysis(sym, force_refresh=force_refresh)
+                )
+            elif metric in (
+                "sharpe_ratio",
+                "sortino_ratio",
+                "max_drawdown_pct",
+                "calmar_ratio",
+            ):
+                data = json.loads(
+                    get_risk_adjusted_returns(
+                        sym, period="1y", force_refresh=force_refresh
+                    )
+                )
             elif metric == "excess_return_pct":
-                data = json.loads(get_relative_strength(sym, benchmark="SPY", period="6mo", force_refresh=force_refresh))
+                data = json.loads(
+                    get_relative_strength(
+                        sym, benchmark="SPY", period="6mo", force_refresh=force_refresh
+                    )
+                )
             elif metric == "composite_score":
                 data = json.loads(get_quant_factors(sym, force_refresh=force_refresh))
             else:
@@ -1115,10 +1389,16 @@ def _extract_headline(item: dict) -> dict:
     canonical = content.get("canonicalUrl")
     return {
         "title": content.get("title"),
-        "publisher": (provider or {}).get("displayName")
-                     if isinstance(provider, dict) else content.get("publisher"),
-        "link": (canonical or {}).get("url")
-                if isinstance(canonical, dict) else content.get("link"),
+        "publisher": (
+            (provider or {}).get("displayName")
+            if isinstance(provider, dict)
+            else content.get("publisher")
+        ),
+        "link": (
+            (canonical or {}).get("url")
+            if isinstance(canonical, dict)
+            else content.get("link")
+        ),
     }
 
 
@@ -1157,24 +1437,42 @@ def _lookup_cik(ticker: str) -> str | None:
 
 
 @_tool_guard
-def get_insider_transactions(symbol: str, days_back: int = 90, force_refresh: bool = False) -> str:
+def get_insider_transactions(
+    symbol: str, days_back: int = 90, force_refresh: bool = False
+) -> str:
     """Fetch recent SEC insider transaction filings (Forms 3, 4, 5)."""
     sym = _check_symbol(symbol)
     days_back = min(days_back, 365)
     if not force_refresh:
         cached_intraday = _intraday_get(sym, "insider_transactions")
         if cached_intraday is not None:
-            return json.dumps({"symbol": sym, **cached_intraday, "source": "intraday_cache"})
+            return json.dumps(
+                {"symbol": sym, **cached_intraday, "source": "intraday_cache"}
+            )
     cik = _lookup_cik(sym)
     if not cik:
-        return json.dumps({"symbol": sym, "insider_activity": [], "total_filings": 0, "note": "Could not find CIK for this symbol.", "source": "live"})
+        return json.dumps(
+            {
+                "symbol": sym,
+                "insider_activity": [],
+                "total_filings": 0,
+                "note": "Could not find CIK for this symbol.",
+                "source": "live",
+            }
+        )
     try:
         url = f"https://data.sec.gov/submissions/CIK{cik}.json"
         req = urllib.request.Request(url, headers={"User-Agent": config.SEC_UA})
         with urllib.request.urlopen(req, timeout=15) as resp:
             data = json.loads(resp.read().decode("utf-8"))
     except Exception as e:
-        return json.dumps({"symbol": sym, "error": f"Failed to fetch SEC filings: {e}", "source": "live"})
+        return json.dumps(
+            {
+                "symbol": sym,
+                "error": f"Failed to fetch SEC filings: {e}",
+                "source": "live",
+            }
+        )
     recent = data.get("filings", {}).get("recent", {})
     forms = recent.get("form", [])
     filing_dates = recent.get("filingDate", [])
@@ -1198,14 +1496,22 @@ def get_insider_transactions(symbol: str, days_back: int = 90, force_refresh: bo
         acc = accession_numbers[i] if i < len(accession_numbers) else ""
         doc = primary_docs[i] if i < len(primary_docs) else ""
         acc_clean = acc.replace("-", "")
-        sec_url = f"https://www.sec.gov/Archives/edgar/data/{cik}/{acc_clean}/{doc}" if doc else ""
+        sec_url = (
+            f"https://www.sec.gov/Archives/edgar/data/{cik}/{acc_clean}/{doc}"
+            if doc
+            else ""
+        )
         filing_xml = None
         insider_name = ""
         transaction_summary = ""
         if doc and acc_clean:
             try:
-                xml_url = f"https://www.sec.gov/Archives/edgar/data/{cik}/{acc_clean}/{doc}"
-                xml_req = urllib.request.Request(xml_url, headers={"User-Agent": config.SEC_UA})
+                xml_url = (
+                    f"https://www.sec.gov/Archives/edgar/data/{cik}/{acc_clean}/{doc}"
+                )
+                xml_req = urllib.request.Request(
+                    xml_url, headers={"User-Agent": config.SEC_UA}
+                )
                 with urllib.request.urlopen(xml_req, timeout=10) as xresp:
                     raw = xresp.read().decode("utf-8", errors="replace")
                 if form == "4":
@@ -1217,12 +1523,15 @@ def get_insider_transactions(symbol: str, days_back: int = 90, force_refresh: bo
                         r"<transactionShares>([^<]*)</transactionShares>.*?"
                         r"<transactionPricePerShare>([^<]*)</transactionPricePerShare>.*?"
                         r"<transactionAcquiredDisposedCode>\s*<value>([AD])</value>",
-                        raw, re.DOTALL
+                        raw,
+                        re.DOTALL,
                     )
                     parts = []
                     for txn_date, shares, price, code in txns[:5]:
                         action = "Acquired (Buy)" if code == "A" else "Disposed (Sell)"
-                        parts.append(f"{action} {shares} shares @ ${price} on {txn_date}")
+                        parts.append(
+                            f"{action} {shares} shares @ ${price} on {txn_date}"
+                        )
                     transaction_summary = "; ".join(parts) if parts else desc
                 elif form in ("3", "5"):
                     nm = re.search(r"<rptOwnerName>([^<]+)</rptOwnerName>", raw)
@@ -1232,13 +1541,17 @@ def get_insider_transactions(symbol: str, days_back: int = 90, force_refresh: bo
             except Exception:
                 transaction_summary = desc
                 insider_name = ""
-        results.append({
-            "filing_date": fd_str,
-            "form_type": form,
-            "insider_name": insider_name or "See filing",
-            "transaction_summary": transaction_summary[:300] if transaction_summary else desc[:300],
-            "sec_url": sec_url,
-        })
+        results.append(
+            {
+                "filing_date": fd_str,
+                "form_type": form,
+                "insider_name": insider_name or "See filing",
+                "transaction_summary": (
+                    transaction_summary[:300] if transaction_summary else desc[:300]
+                ),
+                "sec_url": sec_url,
+            }
+        )
     results.sort(key=lambda x: x["filing_date"], reverse=True)
     out = {"insider_activity": results[:25], "total_filings": len(results)}
     _intraday_set(sym, "insider_transactions", out)
@@ -1255,15 +1568,26 @@ def get_candlestick_patterns(symbol: str, force_refresh: bool = False) -> str:
     if not force_refresh:
         cached_intraday = _intraday_get(sym, "candlestick_patterns")
         if cached_intraday is not None:
-            return json.dumps({"symbol": sym, **cached_intraday, "source": "intraday_cache"})
+            return json.dumps(
+                {"symbol": sym, **cached_intraday, "source": "intraday_cache"}
+            )
     hist = _get_ohlcv(sym, period="3mo", force_refresh=force_refresh)
     if hist is None or len(hist) < 20:
         return json.dumps({"symbol": sym, "error": "Insufficient OHLCV history."})
     import pandas_ta as ta
-    o, h, l, c, v = hist["Open"], hist["High"], hist["Low"], hist["Close"], hist["Volume"]
+
+    o, h, l, c, v = (
+        hist["Open"],
+        hist["High"],
+        hist["Low"],
+        hist["Close"],
+        hist["Volume"],
+    )
     patterns = []
     try:
-        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(
+            io.StringIO()
+        ):
             cdl = ta.cdl_pattern(o, h, l, c, name="all")
         if cdl is not None and not cdl.empty:
             last = cdl.iloc[-1]
@@ -1272,7 +1596,17 @@ def get_candlestick_patterns(symbol: str, force_refresh: bool = False) -> str:
                 if val is not None and val != 0:
                     name = col.replace("CDL_", "").replace("_", " ").title()
                     direction = "bullish" if val > 0 else "bearish"
-                    patterns.append({"name": name, "signal": direction, "strength": "strong" if abs(val) > 100 else "moderate" if abs(val) > 50 else "weak"})
+                    patterns.append(
+                        {
+                            "name": name,
+                            "signal": direction,
+                            "strength": (
+                                "strong"
+                                if abs(val) > 100
+                                else "moderate" if abs(val) > 50 else "weak"
+                            ),
+                        }
+                    )
     except Exception:
         pass
     try:
@@ -1280,7 +1614,13 @@ def get_candlestick_patterns(symbol: str, force_refresh: bool = False) -> str:
         if doji is not None and not doji.empty:
             last_doji = doji.iloc[-1]
             if last_doji and last_doji != 0:
-                patterns.append({"name": "Doji", "signal": "neutral (indecision)", "strength": "moderate"})
+                patterns.append(
+                    {
+                        "name": "Doji",
+                        "signal": "neutral (indecision)",
+                        "strength": "moderate",
+                    }
+                )
     except Exception:
         pass
     try:
@@ -1289,18 +1629,29 @@ def get_candlestick_patterns(symbol: str, force_refresh: bool = False) -> str:
             last_inside = inside.iloc[-1]
             if last_inside and last_inside != 0:
                 direction = "bullish" if last_inside > 0 else "bearish"
-                patterns.append({"name": "Inside Bar", "signal": direction, "strength": "moderate"})
+                patterns.append(
+                    {"name": "Inside Bar", "signal": direction, "strength": "moderate"}
+                )
     except Exception:
         pass
     last_idx = -1
     last_candle = {
-        "date": str(hist.index[last_idx].date()) if hasattr(hist.index[last_idx], "date") else "",
+        "date": (
+            str(hist.index[last_idx].date())
+            if hasattr(hist.index[last_idx], "date")
+            else ""
+        ),
         "open": round(float(o.iloc[last_idx]), 2),
         "high": round(float(h.iloc[last_idx]), 2),
         "low": round(float(l.iloc[last_idx]), 2),
         "close": round(float(c.iloc[last_idx]), 2),
         "volume": int(v.iloc[last_idx]),
-        "body_pct": round(abs(c.iloc[last_idx] - o.iloc[last_idx]) / (h.iloc[last_idx] - l.iloc[last_idx] + 1e-10) * 100, 1),
+        "body_pct": round(
+            abs(c.iloc[last_idx] - o.iloc[last_idx])
+            / (h.iloc[last_idx] - l.iloc[last_idx] + 1e-10)
+            * 100,
+            1,
+        ),
     }
     result = {"patterns": patterns, "last_candle": last_candle}
     _intraday_set(sym, "candlestick_patterns", result)
@@ -1313,41 +1664,42 @@ def get_candlestick_patterns(symbol: str, force_refresh: bool = False) -> str:
 def _get_cooldown_exclusions() -> set[str]:
     """Return tickers that were stopped out within STOPOUT_COOLDOWN_DAYS."""
     import re as _re
+
     excl: set[str] = set()
     cutoff = datetime.now() - timedelta(days=config.STOPOUT_COOLDOWN_DAYS)
-    d = config.CLOSED_TRADES_DIR
-    if not d.is_dir():
-        return excl
-    for fp in d.glob("*.md"):
-        stem = fp.stem
-        parts = stem.split("--", 1)
-        if len(parts) == 2:
-            date_str, ticker = parts
-        else:
+    for d in config.closed_trades_dirs():
+        if not d.is_dir():
             continue
-        ticker = ticker.upper()
-        # Remove any trailing --N sequence suffix
-        ticker = _re.sub(r"--\d+$", "", ticker)
-        if ticker not in config.WATCHLIST:
-            continue
-        file_date = datetime.strptime(date_str, "%Y-%m-%d")
-        if file_date < cutoff:
-            continue
-        # Read content to check if this was a stop-out
-        try:
-            raw = fp.read_text(encoding="utf-8")
-        except Exception:
-            continue
-        yaml_outcome = _parse_yaml_outcome(raw)
-        if yaml_outcome is not None and yaml_outcome.strip(">| \t\n"):
-            # YAML frontmatter present with non-empty outcome
-            outcome_lower = yaml_outcome.lower()
-            if any(kw in outcome_lower for kw in ["stop", "loss"]):
-                excl.add(ticker)
-        else:
-            # No YAML or empty outcome — search full text
-            if _re.search(r"(stopped\s+out|\boutcome.*\bstop)", raw, _re.IGNORECASE):
-                excl.add(ticker)
+        for fp in d.glob("*.md"):
+            stem = fp.stem
+            parts = stem.split("--", 1)
+            if len(parts) == 2:
+                date_str, ticker = parts
+            else:
+                continue
+            ticker = ticker.upper()
+            # Remove any trailing --N sequence suffix
+            ticker = _re.sub(r"--\d+$", "", ticker)
+            if ticker not in config.WATCHLIST:
+                continue
+            file_date = datetime.strptime(date_str, "%Y-%m-%d")
+            if file_date < cutoff:
+                continue
+            # Read content to check if this was a stop-out
+            try:
+                raw = fp.read_text(encoding="utf-8")
+            except Exception:
+                continue
+            yaml_outcome = _parse_yaml_outcome(raw)
+            if yaml_outcome is not None and yaml_outcome.strip(">| \t\n"):
+                # YAML frontmatter present with non-empty outcome
+                outcome_lower = yaml_outcome.lower()
+                if any(kw in outcome_lower for kw in ["stop", "loss"]):
+                    excl.add(ticker)
+            else:
+                # No YAML or empty outcome — search full text
+                if _re.search(r"(stopped\s+out|\boutcome.*\bstop)", raw, _re.IGNORECASE):
+                    excl.add(ticker)
     return excl
 
 
@@ -1368,8 +1720,11 @@ def _parse_yaml_outcome(raw: str) -> str | None:
 # Tool: Screening — Python-based pre-filter (NEW)
 # ---------------------------------------------------------------------------
 @_tool_guard
-def run_screening() -> str:
+def run_screening(mode: str = "full") -> str:
     """Read cached yf_data, compute composite scores, return top 10 tickers.
+
+    Args:
+        mode: "fasset" for the 44-ticker curated list, "full" for all 100+ (default).
 
     Uses watchlist_summary.json if available. Falls back to on-the-fly
     scoring from individual cached symbol data. Recently stopped-out tickers
@@ -1378,6 +1733,8 @@ def run_screening() -> str:
     Scoring: fundamental_quality * 0.35 + momentum_12_1 * 0.35 +
              rsi_neutrality * 0.15 + sharpe_ratio * 0.15
     """
+    watchlist = config.get_watchlist(mode)
+
     def _score_one(qs, momentum_12_1, rsi_14, sharpe_ratio):
         weight_present = 0.0
         s = 0.0
@@ -1391,11 +1748,15 @@ def run_screening() -> str:
             weight_present += 0.35
         if rsi_14 is not None:
             rsi_val = float(rsi_14)
-            rsi_score = (50 - abs(rsi_val - 50)) / 50 * 10  # 0 (extreme) to 10 (neutral)
+            rsi_score = (
+                (50 - abs(rsi_val - 50)) / 50 * 10
+            )  # 0 (extreme) to 10 (neutral)
             s += rsi_score * 0.15
             weight_present += 0.15
         if sharpe_ratio is not None:
-            sharpe_score = max(0, min(10, (float(sharpe_ratio) + 1) * 5))  # -1→0, 0→5, 1→10
+            sharpe_score = max(
+                0, min(10, (float(sharpe_ratio) + 1) * 5)
+            )  # -1→0, 0→5, 1→10
             s += sharpe_score * 0.15
             weight_present += 0.15
         return max(0, min(100, s)), weight_present
@@ -1416,7 +1777,7 @@ def run_screening() -> str:
     if exclusions:
         print(f"[SCREENING] Cooldown exclusions: {', '.join(sorted(exclusions))}")
 
-    active_watchlist = [s for s in config.WATCHLIST if s not in exclusions]
+    active_watchlist = [s for s in watchlist if s not in exclusions]
 
     # Fundamental quality gate: exclude tickers with deeply negative margins
     # or no earnings power (both trailing and forward P/E unavailable).
@@ -1439,7 +1800,9 @@ def run_screening() -> str:
     filtered = [s for s in active_watchlist if _passes_fundamental_gate(s)]
     dropped = [s for s in active_watchlist if s not in filtered]
     if dropped:
-        print(f"[SCREENING] Fundamental quality gate excluded: {', '.join(sorted(dropped))}")
+        print(
+            f"[SCREENING] Fundamental quality gate excluded: {', '.join(sorted(dropped))}"
+        )
     active_watchlist = filtered
 
     summary_path = config.CACHE_DIR / "watchlist_summary.json"
@@ -1458,19 +1821,26 @@ def run_screening() -> str:
                 rsi_14 = entry.get("rsi_14")
                 sharpe_ratio = entry.get("sharpe_ratio")
                 s, weight_present = _score_one(qs, momentum_12_1, rsi_14, sharpe_ratio)
-                scored.append({
-                    "symbol": sym, "composite_score": round(s, 1),
-                    "quant_score": qs, "momentum_12_1_pct": momentum_12_1,
-                    "rsi_14": rsi_14, "sharpe_ratio": sharpe_ratio,
-                    "weight_present": weight_present,
-                })
+                scored.append(
+                    {
+                        "symbol": sym,
+                        "composite_score": round(s, 1),
+                        "quant_score": qs,
+                        "momentum_12_1_pct": momentum_12_1,
+                        "rsi_14": rsi_14,
+                        "sharpe_ratio": sharpe_ratio,
+                        "weight_present": weight_present,
+                    }
+                )
             if len(scored) > 0:
-                return json.dumps({
-                    "top_candidates": _build_top(scored),
-                    "total_screened": len(scored),
-                    "source": "sidecar",
-                    "method": "fundamental_quality*0.35 + momentum_12_1*0.35 + rsi_neutrality*0.15 + sharpe_ratio*0.15",
-                })
+                return json.dumps(
+                    {
+                        "top_candidates": _build_top(scored),
+                        "total_screened": len(scored),
+                        "source": "sidecar",
+                        "method": "fundamental_quality*0.35 + momentum_12_1*0.35 + rsi_neutrality*0.15 + sharpe_ratio*0.15",
+                    }
+                )
         except (OSError, json.JSONDecodeError):
             pass
 
@@ -1485,20 +1855,27 @@ def run_screening() -> str:
             ra_data = json.loads(get_risk_adjusted_returns(sym, period="1y"))
             sharpe_ratio = ra_data.get("sharpe_ratio")
             s, weight_present = _score_one(qs, momentum_12_1, rsi_14, sharpe_ratio)
-            result_list.append({
-                "symbol": sym, "composite_score": round(s, 1),
-                "quant_score": qs, "momentum_12_1_pct": momentum_12_1,
-                "rsi_14": rsi_14, "sharpe_ratio": sharpe_ratio,
-                "weight_present": weight_present,
-            })
+            result_list.append(
+                {
+                    "symbol": sym,
+                    "composite_score": round(s, 1),
+                    "quant_score": qs,
+                    "momentum_12_1_pct": momentum_12_1,
+                    "rsi_14": rsi_14,
+                    "sharpe_ratio": sharpe_ratio,
+                    "weight_present": weight_present,
+                }
+            )
         except Exception:
             continue
-    return json.dumps({
-        "top_candidates": _build_top(result_list),
-        "total_screened": len(result_list),
-        "source": "live",
-        "method": "fundamental_quality*0.35 + momentum_12_1*0.35 + rsi_neutrality*0.15 + sharpe_ratio*0.15",
-    })
+    return json.dumps(
+        {
+            "top_candidates": _build_top(result_list),
+            "total_screened": len(result_list),
+            "source": "live",
+            "method": "fundamental_quality*0.35 + momentum_12_1*0.35 + rsi_neutrality*0.15 + sharpe_ratio*0.15",
+        }
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -1507,7 +1884,7 @@ def run_screening() -> str:
 @_tool_guard
 def check_portfolio_exposure(new_symbols: list[str] | None = None) -> str:
     """Check existing open trades for sector/symbol overlap before opening new positions."""
-    mem = config.AGENT_FS_ROOT / "memories"
+    mem = config.active_memories_root()
     open_dir = mem / "open_trades"
     existing = []
     if open_dir.is_dir():
@@ -1546,7 +1923,9 @@ def check_portfolio_exposure(new_symbols: list[str] | None = None) -> str:
         new_set = {s.upper() for s in new_symbols}
         overlap = existing_syms & new_set
         if overlap:
-            warnings.append(f"Already have open positions in: {', '.join(sorted(overlap))}")
+            warnings.append(
+                f"Already have open positions in: {', '.join(sorted(overlap))}"
+            )
         existing_sectors_list = [sectors.get(s, "Unknown") for s in existing_syms if s]
         for ns in new_set:
             new_sector = "Unknown"
@@ -1557,19 +1936,23 @@ def check_portfolio_exposure(new_symbols: list[str] | None = None) -> str:
                     new_sector = data.get("info", {}).get("sector", "Unknown")
                 except Exception:
                     pass
-            same_sector = [s for s in existing_sectors_list if s == new_sector and s != "Unknown"]
+            same_sector = [
+                s for s in existing_sectors_list if s == new_sector and s != "Unknown"
+            ]
             if same_sector:
                 warnings.append(
                     f"{ns} ({new_sector}) would add concentration — "
                     f"already have {len(same_sector)} position(s) in {new_sector}"
                 )
-    return json.dumps({
-        "existing_open_trades": existing,
-        "sectors": sectors,
-        "proposed_new_symbols": new_symbols,
-        "warnings": warnings,
-        "trade_count": len(existing),
-    })
+    return json.dumps(
+        {
+            "existing_open_trades": existing,
+            "sectors": sectors,
+            "proposed_new_symbols": new_symbols,
+            "warnings": warnings,
+            "trade_count": len(existing),
+        }
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -1582,23 +1965,29 @@ def get_intraday_cache_status() -> str:
     entries = []
     for key, entry in _intraday_cache.items():
         age_min = round((now - entry["fetched_at"]) / 60, 1)
-        entries.append({
-            "key": key,
-            "age_minutes": age_min,
-            "expires_in_minutes": round(config.INTRADAY_CACHE_MINUTES - age_min, 1),
-        })
+        entries.append(
+            {
+                "key": key,
+                "age_minutes": age_min,
+                "expires_in_minutes": round(config.INTRADAY_CACHE_MINUTES - age_min, 1),
+            }
+        )
     ohlcv_entries = []
     for key, entry in _intraday_ohlcv_cache.items():
         age_min = round((now - entry["fetched_at"]) / 60, 1)
-        ohlcv_entries.append({
-            "key": key,
-            "age_minutes": age_min,
-            "rows": len(entry["df"]),
-        })
-    return json.dumps({
-        "intraday_cache_minutes": config.INTRADAY_CACHE_MINUTES,
-        "tool_cache_entries": len(entries),
-        "ohlcv_cache_entries": len(ohlcv_entries),
-        "tool_cache": entries,
-        "ohlcv_cache": ohlcv_entries,
-    })
+        ohlcv_entries.append(
+            {
+                "key": key,
+                "age_minutes": age_min,
+                "rows": len(entry["df"]),
+            }
+        )
+    return json.dumps(
+        {
+            "intraday_cache_minutes": config.INTRADAY_CACHE_MINUTES,
+            "tool_cache_entries": len(entries),
+            "ohlcv_cache_entries": len(ohlcv_entries),
+            "tool_cache": entries,
+            "ohlcv_cache": ohlcv_entries,
+        }
+    )

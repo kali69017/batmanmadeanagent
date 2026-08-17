@@ -27,7 +27,9 @@ class MemoryManager:
         entries = self._read_dir("open_trades")
         best: dict[str, dict] = {}
         for e in entries:
-            tkr = (e.get("ticker") or self._ticker_from_filename(e.get("file", "")) or "").upper()
+            tkr = (
+                e.get("ticker") or self._ticker_from_filename(e.get("file", "")) or ""
+            ).upper()
             if not tkr:
                 continue
             if tkr not in best or e["file"] > best[tkr]["file"]:
@@ -47,9 +49,15 @@ class MemoryManager:
                 return candidate
             seq += 1
 
-    def write_pick(self, ticker: str, direction: str, rationale: str,
-                   signals: list | None = None, entry_price: float | None = None,
-                   signal_names: list | None = None) -> str:
+    def write_pick(
+        self,
+        ticker: str,
+        direction: str,
+        rationale: str,
+        signals: list | None = None,
+        entry_price: float | None = None,
+        signal_names: list | None = None,
+    ) -> str:
         fp = self._next_filename("open_trades", ticker)
         today = datetime.now().strftime("%Y-%m-%d")
         signals_str = json.dumps(signal_names or [])
@@ -75,8 +83,13 @@ class MemoryManager:
     # -----------------------------------------------------------------------
     # Watchlist / rejects
     # -----------------------------------------------------------------------
-    def write_watchlist_entry(self, ticker: str, direction: str = "watch",
-                              rationale: str = "", condition: str = "") -> str:
+    def write_watchlist_entry(
+        self,
+        ticker: str,
+        direction: str = "watch",
+        rationale: str = "",
+        condition: str = "",
+    ) -> str:
         fp = self._next_filename("watchlist", ticker)
         today = datetime.now().strftime("%Y-%m-%d")
         body = (
@@ -99,7 +112,9 @@ class MemoryManager:
         return str(fp)
 
     def write_reject(self, ticker: str, rationale: str) -> str:
-        return self.write_watchlist_entry(ticker, direction="reject", rationale=rationale)
+        return self.write_watchlist_entry(
+            ticker, direction="reject", rationale=rationale
+        )
 
     # -----------------------------------------------------------------------
     # Signals log
@@ -107,9 +122,13 @@ class MemoryManager:
     def update_signal_log(self, signal_name: str, triggered_correctly: bool):
         slug = signal_name.lower().replace(" ", "_").replace("-", "_")
         fp = self.mem / "signals_log" / f"{slug}.md"
-        stats = {"signal": signal_name, "triggered_correctly": 0,
-                 "triggered_falsely": 0, "win_rate": None,
-                 "last_updated": datetime.now().strftime("%Y-%m-%d")}
+        stats = {
+            "signal": signal_name,
+            "triggered_correctly": 0,
+            "triggered_falsely": 0,
+            "win_rate": None,
+            "last_updated": datetime.now().strftime("%Y-%m-%d"),
+        }
         if fp.exists():
             text = fp.read_text(encoding="utf-8")
             for line in text.split("\n"):
@@ -123,7 +142,9 @@ class MemoryManager:
         else:
             stats["triggered_falsely"] += 1
         total = stats["triggered_correctly"] + stats["triggered_falsely"]
-        stats["win_rate"] = round(stats["triggered_correctly"] / total * 100, 1) if total > 0 else None
+        stats["win_rate"] = (
+            round(stats["triggered_correctly"] / total * 100, 1) if total > 0 else None
+        )
         stats["last_updated"] = datetime.now().strftime("%Y-%m-%d")
         body = (
             f"---\n"
@@ -205,8 +226,7 @@ class MemoryManager:
                 "For each open trade below: pull fresh full technicals "
                 "(force_refresh=True), then use your own current judgment — "
                 "informed by the lessons above — to decide whether to hold, "
-                "tighten the stop, take partial profit, or close.\n\n"
-                + entries
+                "tighten the stop, take partial profit, or close.\n\n" + entries
             )
         if include_watchlist:
             watch_dir = self.mem / "watchlist"
@@ -232,8 +252,7 @@ class MemoryManager:
                 for s in signals_log
             )
             blocks.append(
-                "### SIGNAL PERFORMANCE (win rates from history)\n"
-                f"{sig_entries}"
+                "### SIGNAL PERFORMANCE (win rates from history)\n" f"{sig_entries}"
             )
         if not blocks:
             return query
@@ -270,4 +289,3 @@ class MemoryManager:
         if len(parts) == 2:
             return parts[1]
         return stem
-

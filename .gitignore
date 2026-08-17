@@ -6,3 +6,8 @@ __pycache__/
 yf_data/
 .opencode/
 yf_data_archive.zip
+db.sqlite3
+*.log
+agent_fs/users/
+deepagents-main/
+deepagentsLatestRepo/

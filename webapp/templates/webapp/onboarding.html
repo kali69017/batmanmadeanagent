@@ -1,0 +1,61 @@
+{% extends "webapp/base.html" %}{% block title %}Welcome — Reflex{% endblock %}
+{% block content %}
+<div class="login-container">
+  <header class="app-header">
+    <div class="flex items-center gap-2"><span class="app-brand">Reflex</span></div>
+  </header>
+
+  <main class="onboarding-main">
+    <div class="onboarding-card">
+
+      <div class="onboarding-step">
+        <span class="onboarding-num">1</span>
+        <h2>What Reflex does</h2>
+        <p>
+          Reflex is an automated research tool. Every trading day, it screens a
+          watchlist of stocks, analyzes the strongest candidates, and surfaces
+          picks with a suggested buy range, target, and exit point.
+        </p>
+        <p class="onboarding-em">It doesn't place trades for you. You decide what to act on.</p>
+      </div>
+
+      <div class="onboarding-step">
+        <span class="onboarding-num">2</span>
+        <h2>What Confidence means</h2>
+        <p>
+          Each pick shows a Confidence badge: High, Medium, or Low. This reflects
+          how strong the signal looked when it was generated, not a guarantee of
+          outcome.
+        </p>
+        <p>
+          High confidence picks have historically performed better on average,
+          but every pick carries risk. Check the Portfolio tab for actual win
+          rate and average return, not just today's badges.
+        </p>
+      </div>
+
+      <div class="onboarding-step">
+        <span class="onboarding-num">3</span>
+        <h2>Not financial advice</h2>
+        <p>
+          Reflex provides research and analysis, not personalized investment
+          advice. Nothing in this app is a recommendation to buy or sell any
+          security.
+        </p>
+        <p>
+          Markets carry risk, including loss of principal. Past performance shown
+          in this app does not predict future results. You are responsible for
+          your own investment decisions, and should consult a licensed financial
+          advisor before acting on anything here.
+        </p>
+      </div>
+
+      <form method="post" action="{% url 'onboarding_complete' %}" class="onboarding-footer">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Got it</button>
+      </form>
+
+    </div>
+  </main>
+</div>
+{% endblock %}

@@ -6,6 +6,7 @@ Modular architecture: config.py → tools.py → memory.py → agents.py → fin
 Run:
     python finance_agent.py
 """
+
 import json
 import io
 import re
@@ -38,7 +39,7 @@ if __name__ == "__main__":
             for k, v in args.items():
                 val = str(v)
                 if len(val) > width - len(k) - 4:
-                    val = val[:width - len(k) - 7] + "..."
+                    val = val[: width - len(k) - 7] + "..."
                 lines.append(f"    {k}: {val}")
             return "\n".join(lines)
         return f"    {args}"
@@ -46,7 +47,7 @@ if __name__ == "__main__":
     def _fmt_tool_result(content: str, width: int = 90) -> str:
         s = str(content)
         if len(s) > width:
-            return s[:width - 3] + "..."
+            return s[: width - 3] + "..."
         return s
 
     def _print_divider(char="─", length=80):
@@ -64,7 +65,7 @@ if __name__ == "__main__":
             print(f"\n\033[2;37m\u2764 THINKING:\033[0m")
             for line in thinking.split("\n"):
                 print(f"  \033[2;37m{line}\033[0m")
-            after = text[thinking_match.end():].strip()
+            after = text[thinking_match.end() :].strip()
             if after:
                 print(f"\n\033[1;33m\u1F4DD RESPONSE:\033[0m")
                 print(after)
@@ -83,21 +84,29 @@ if __name__ == "__main__":
     def _print_subagent(name: str, action: str):
         print(f"\n\033[1;33m\u1F916 SUB-AGENT [{name}]: {action}\033[0m")
 
+    query = "what are current pending and watchlist positions?"
 
-
-    query = (
-        "what are current pending and watchlist positions?"
-    )
-
-    '''query = (
+    """query = (
         "Scan the watchlist and tell me if any stocks are worth buying right now. "
         "If you find good trade ideas, give me the top ones with entry zones, "
         "stop losses, targets, and rationale. If no stocks are good to buy now, "
         "just suggest the best candidates as watchlist items with the condition "
         "that needs to be met before entry."
-    )'''
+    )"""
 
-    is_scan_query = any(kw in query.lower() for kw in ["scan", "screen", "rank", "best", "top", "suggest", "watchlist", "market leaders"])
+    is_scan_query = any(
+        kw in query.lower()
+        for kw in [
+            "scan",
+            "screen",
+            "rank",
+            "best",
+            "top",
+            "suggest",
+            "watchlist",
+            "market leaders",
+        ]
+    )
 
     mem = config.AGENT_FS_ROOT / "memories"
     _pre_run_open: set[str] = set()
@@ -114,12 +123,19 @@ if __name__ == "__main__":
     _tool_called_symbols: set[str] = set()
 
     TOOLS_THAT_TAKE_SYMBOL = {
-        "get_price_data", "get_technical_analysis", "get_fundamentals",
-        "get_relative_strength", "get_risk_adjusted_returns",
-        "get_momentum_indicators", "get_trend_indicators",
-        "get_volatility_indicators", "get_volume_indicators",
-        "get_pivot_points", "get_quant_factors",
-        "get_insider_transactions", "get_candlestick_patterns",
+        "get_price_data",
+        "get_technical_analysis",
+        "get_fundamentals",
+        "get_relative_strength",
+        "get_risk_adjusted_returns",
+        "get_momentum_indicators",
+        "get_trend_indicators",
+        "get_volatility_indicators",
+        "get_volume_indicators",
+        "get_pivot_points",
+        "get_quant_factors",
+        "get_insider_transactions",
+        "get_candlestick_patterns",
     }
 
     print(f"\n\033[1;37m{'='*80}\033[0m")
@@ -159,36 +175,68 @@ if __name__ == "__main__":
                             msg_type = msg.type
 
                         if msg_type == "ai":
-                            content = msg.content if hasattr(msg, "content") else str(msg)
-                            tool_calls = msg.tool_calls if hasattr(msg, "tool_calls") else []
+                            content = (
+                                msg.content if hasattr(msg, "content") else str(msg)
+                            )
+                            tool_calls = (
+                                msg.tool_calls if hasattr(msg, "tool_calls") else []
+                            )
 
                             if content:
                                 _print_thinking(content)
 
                             for tc in tool_calls:
-                                func_name = tc.get("name", "?") if isinstance(tc, dict) else getattr(tc, "name", "?")
-                                func_args = tc.get("args", {}) if isinstance(tc, dict) else getattr(tc, "args", {})
+                                func_name = (
+                                    tc.get("name", "?")
+                                    if isinstance(tc, dict)
+                                    else getattr(tc, "name", "?")
+                                )
+                                func_args = (
+                                    tc.get("args", {})
+                                    if isinstance(tc, dict)
+                                    else getattr(tc, "args", {})
+                                )
                                 if func_name in TOOLS_THAT_TAKE_SYMBOL:
-                                    sym = func_args.get("symbol") if isinstance(func_args, dict) else None
+                                    sym = (
+                                        func_args.get("symbol")
+                                        if isinstance(func_args, dict)
+                                        else None
+                                    )
                                     if sym:
                                         _tool_called_symbols.add(sym)
-                                if func_name in ("write_file", "edit_file") and isinstance(func_args, dict):
+                                if func_name in (
+                                    "write_file",
+                                    "edit_file",
+                                ) and isinstance(func_args, dict):
                                     fp = func_args.get("file_path", "")
                                     if "/memories/" in fp:
                                         _written_memory_files.add(fp)
-                                if func_name == "read_file" and isinstance(func_args, dict):
+                                if func_name == "read_file" and isinstance(
+                                    func_args, dict
+                                ):
                                     fp = func_args.get("file_path", "")
                                     if "/memories/open_trades/" in fp:
                                         _reviewed_trade_files.add(fp)
-                                _print_tool_call(func_name, json.dumps(func_args, indent=2) if isinstance(func_args, dict) else str(func_args))
+                                _print_tool_call(
+                                    func_name,
+                                    (
+                                        json.dumps(func_args, indent=2)
+                                        if isinstance(func_args, dict)
+                                        else str(func_args)
+                                    ),
+                                )
 
                         elif msg_type == "tool":
-                            content = msg.content if hasattr(msg, "content") else str(msg)
+                            content = (
+                                msg.content if hasattr(msg, "content") else str(msg)
+                            )
                             name = msg.name if hasattr(msg, "name") else "?"
                             _print_tool_result(name, content)
 
                         elif msg_type == "human":
-                            content = msg.content if hasattr(msg, "content") else str(msg)
+                            content = (
+                                msg.content if hasattr(msg, "content") else str(msg)
+                            )
                             print(f"\n\033[1;34m\u1F464 USER:\033[0m {content}")
 
                         else:
@@ -225,22 +273,32 @@ if __name__ == "__main__":
     if is_scan_query:
         reviewed = set()
         for fp in _written_memory_files:
-            if fp.startswith("/memories/open_trades/") or fp.startswith("/memories/pending_entries/"):
+            if fp.startswith("/memories/open_trades/") or fp.startswith(
+                "/memories/pending_entries/"
+            ):
                 reviewed.add(Path(fp).stem)
         for fp in _reviewed_trade_files:
-            if fp.startswith("/memories/open_trades/") or fp.startswith("/memories/pending_entries/"):
+            if fp.startswith("/memories/open_trades/") or fp.startswith(
+                "/memories/pending_entries/"
+            ):
                 reviewed.add(Path(fp).stem)
         unresolved = _pre_run_open - reviewed
         if unresolved:
-            print(f"  \033[1;33m\u26A0 Phase 1: {len(unresolved)} open trade(s) were not written during this run:\033[0m")
+            print(
+                f"  \033[1;33m\u26A0 Phase 1: {len(unresolved)} open trade(s) were not written during this run:\033[0m"
+            )
             for s in sorted(unresolved):
                 print(f"    - {s}")
         else:
             n_reviewed = len(_pre_run_open)
             if n_reviewed:
-                print(f"  \033[1;32m\u2705 Phase 1 OK: All {n_reviewed} carryover open trade(s) reviewed.\033[0m")
+                print(
+                    f"  \033[1;32m\u2705 Phase 1 OK: All {n_reviewed} carryover open trade(s) reviewed.\033[0m"
+                )
             else:
-                print(f"  \033[1;32m\u2705 Phase 1 OK: No carryover open trades.\033[0m")
+                print(
+                    f"  \033[1;32m\u2705 Phase 1 OK: No carryover open trades.\033[0m"
+                )
 
     if is_scan_query and _tool_called_symbols:
         tracked_syms: set[str] = set()
@@ -250,10 +308,12 @@ if __name__ == "__main__":
             ticker = (parts[-1] if len(parts) > 1 else parts[0]).upper()
             if ticker in config.WATCHLIST:
                 tracked_syms.add(ticker)
-        for d, exists in [(open_dir, open_dir and open_dir.is_dir()),
-                          (pending_dir, pending_dir and pending_dir.is_dir()),
-                          (watch_dir, watch_dir and watch_dir.is_dir()),
-                          (closed_dir, closed_dir and closed_dir.is_dir())]:
+        for d, exists in [
+            (open_dir, open_dir and open_dir.is_dir()),
+            (pending_dir, pending_dir and pending_dir.is_dir()),
+            (watch_dir, watch_dir and watch_dir.is_dir()),
+            (closed_dir, closed_dir and closed_dir.is_dir()),
+        ]:
             if exists:
                 for f in d.glob("*.md"):
                     parts = f.stem.split("--")
@@ -262,7 +322,9 @@ if __name__ == "__main__":
                         tracked_syms.add(ticker)
         missing = _tool_called_symbols - tracked_syms
         if missing:
-            print(f"  \033[1;31m\u26A0 Scan compliance: {len(missing)} analyzed symbol(s) have no entry:\033[0m")
+            print(
+                f"  \033[1;31m\u26A0 Scan compliance: {len(missing)} analyzed symbol(s) have no entry:\033[0m"
+            )
             for s in sorted(missing):
                 print(f"    - {s}")
             today = datetime.now().strftime("%Y-%m-%d")
@@ -287,6 +349,8 @@ if __name__ == "__main__":
                 fp.write_text(body, encoding="utf-8")
                 print(f"    \u2192 Created watchlist/reject entry for {s}")
         else:
-            print(f"  \033[1;32m\u2705 Scan compliance OK: All {len(_tool_called_symbols)} analyzed symbols tracked.\033[0m")
+            print(
+                f"  \033[1;32m\u2705 Scan compliance OK: All {len(_tool_called_symbols)} analyzed symbols tracked.\033[0m"
+            )
 
     print(f"\n\033[2;37m(Compliance check complete)\033[0m")

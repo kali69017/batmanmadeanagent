@@ -1,26 +1,8 @@
 ---
 signal: composite_screening_top10
-description: Top 10 by composite score using fundamental_quality*0.35 + momentum_12_1*0.35 + rsi_neutrality*0.15 + sharpe_ratio*0.15
-triggered_correctly: 3
-triggered_falsely: 2
+triggered_correctly: 2
+triggered_falsely: 1
+win_rate: 0.667
 notes: >
-  Used to surface candidates from watchlist. Has correctly identified winners
-  (CRM, AAPL, V, ABBV) but also surfaces momentum traps (RIOT, HUT, RKLB)
-  when momentum dominates composite. Requires FA deep-dive cross-check.
-  Most useful when composite scores >30 and candidates are from diverse sectors.
-  When all scores <30, signals market narrowness — be patient.
-
-  Recent hits: CRM (T1 hit +7.8%, running to T2), AAPL (T1 hit +4.3%, running to T2),
-  V (T1 hit +4.0%, running to T2), SNOW (T1 hit +6.5%, running to T2).
-
-  Recent misses: RKLB (rank #5, rejected — TA 35, FA 5, unprofitable, extreme distribution).
-  META (rank #4, stopped out same day -8.7% — death cross + negative CMF).
-  Lesson: high composite score driven by momentum alone is a trap if FA is poor.
-  Lesson: death cross + negative CMF candidates should be excluded from screening.
-
-  2026-07-31 update: RKLB correctly identified as momentum trap (momentum_12_1 +84%
-  but below all SMAs, CMF -0.33). ABBV correctly surfaced as quality candidate
-  (rank #2) but needs pullback entry. APH surfaced (rank #10) with elite FA but
-  ADX 15.6 — correctly held back per Lesson #2. Screening continues to work as
-  a first-pass filter when cross-checked with TA/FA deep-dives.
+  FULL T2 COMPLETIONS: CRM (+12.95% blended, T2 8/10), SNOW (+12.65% blended, T2 8/06), CVX (+4.26% blended, T2 8/14). WINNERS (T1 + partial): DAL (+1.3% T1, running to T2 $95 at $89.35), V (+1.3% T1, running to T2 $390 at $364.15). LOSERS: AAPL (stopped 8/03), AMD (stopped 7/28), AVGO (stopped 7/30). NEUTRAL: META v1 (stopped same-day 7/30), META v2 (blended -0.32%, T1 hit but T2 failed per Lesson #35). FILLED: BABA (8/13 at $124.88, now $123.81). PENDING: EOG ($138-143.50, gate MACD bullish), BP ($41.50-43, gate MACD bullish), BAC ($62.50-64, gate RSI<70 + StochRSI<80), COP ($123.63-125, gate StochRSI<80 — NEW 8/16). 2026-08-16 Full scan (131 tickers): MU #1 (31.5) rejected 5th+ time — negative CMF value trap (Lesson #29). EOG #2 pending. COP #3 (30.9) → NEW PENDING (pullback). OXY #4 (29.7) rejected — marginal CMF +0.022, ADX 18.6. C #5 (27.9) rejected — overbought, CMF -0.003. DELL #6 (27.8) rejected — StochRSI 98.5, ADX 13.5, CMF -0.01. BP #7 pending. BAC #8 pending. CRM #9 (26.8) rejected — death cross + OBV divergence. BABA #10 filled. Net: 1 new pending (COP), 0 new filled. Breadth recovered (>30 scores) but entries extended — "good but not great" (Lesson #39).
 ---

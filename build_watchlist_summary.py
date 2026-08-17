@@ -13,8 +13,12 @@ from datetime import datetime, timezone
 
 import config
 from tools import (
-    get_price_data, get_fundamentals, get_technicals,
-    get_risk_adjusted_returns, get_relative_strength, get_quant_factors,
+    get_price_data,
+    get_fundamentals,
+    get_technicals,
+    get_risk_adjusted_returns,
+    get_relative_strength,
+    get_quant_factors,
 )
 
 
@@ -33,9 +37,19 @@ def build_summary() -> dict:
 
         try:
             fund = json.loads(get_fundamentals(sym))
-            for f in ("trailingPE", "forwardPE", "pegRatio", "priceToBook",
-                      "dividendYield", "revenueGrowth", "earningsGrowth",
-                      "marketCap", "sector", "industry", "recommendationKey"):
+            for f in (
+                "trailingPE",
+                "forwardPE",
+                "pegRatio",
+                "priceToBook",
+                "dividendYield",
+                "revenueGrowth",
+                "earningsGrowth",
+                "marketCap",
+                "sector",
+                "industry",
+                "recommendationKey",
+            ):
                 entry[f] = fund.get(f)
         except Exception as e:
             entry["fundamentals_error"] = str(e)
@@ -50,13 +64,20 @@ def build_summary() -> dict:
 
         try:
             risk_adj = json.loads(get_risk_adjusted_returns(sym, period="1y"))
-            for f in ("sharpe_ratio", "sortino_ratio", "max_drawdown_pct", "calmar_ratio"):
+            for f in (
+                "sharpe_ratio",
+                "sortino_ratio",
+                "max_drawdown_pct",
+                "calmar_ratio",
+            ):
                 entry[f] = risk_adj.get(f)
         except Exception as e:
             entry["risk_adjusted_error"] = str(e)
 
         try:
-            rel_strength = json.loads(get_relative_strength(sym, benchmark="SPY", period="6mo"))
+            rel_strength = json.loads(
+                get_relative_strength(sym, benchmark="SPY", period="6mo")
+            )
             entry["excess_return_pct"] = rel_strength.get("excess_return_pct")
             entry["outperforming_spy"] = rel_strength.get("outperforming")
         except Exception as e:
@@ -86,4 +107,5 @@ if __name__ == "__main__":
     n_ok = sum(1 for r in summary["watchlist"].values() if "price_error" not in r)
     print(f"Wrote {out_path} — {n_ok}/{len(config.WATCHLIST)} symbols fully populated.")
     from tools import _save_intraday_cache
+
     _save_intraday_cache()

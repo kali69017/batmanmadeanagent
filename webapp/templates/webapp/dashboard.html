@@ -1,0 +1,124 @@
+{% extends "webapp/base.html" %}{% load static %}
+{% block title %}Reflex{% endblock %}
+{% block content %}
+<div class="h-screen flex flex-col">
+
+  <!-- ═══ HEADER ═══ -->
+  <header class="app-header">
+    <div class="flex items-center gap-2">
+      <span class="app-brand">Reflex</span>
+      <span class="hide-mobile text-xs text-muted">It doesn't just predict. It evolves.</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <span id="updated-at" class="text-xs text-muted"></span>
+      <button id="theme-toggle" class="btn-icon hide-mobile" title="Toggle theme">◐</button>
+      <button class="btn-icon" title="Account" id="account-btn">👤</button>
+      <form method="post" action="{% url 'logout' %}" id="logout-form" class="hidden">
+        {% csrf_token %}
+      </form>
+    </div>
+  </header>
+
+  <div class="flex-1 flex min-h-0">
+
+    <!-- ═══ NAV RAIL ═══ -->
+    <aside class="rail">
+      <nav>
+        <button data-screen="home" class="rail-nav-btn active" aria-pressed="true">
+          <span>Home</span><span class="badge">⌘1</span>
+        </button>
+        <button data-screen="portfolio" class="rail-nav-btn" aria-pressed="false">
+          <span>Portfolio</span><span class="badge">⌘2</span>
+        </button>
+        <button data-screen="ask" class="rail-nav-btn" aria-pressed="false">
+          <span>Ask</span><span class="badge">⌘3</span>
+        </button>
+      </nav>
+
+      <div class="rail-footer">
+        <div class="rail-footer-line"></div>
+        <p style="font-size:.65rem;color:var(--text-muted)">
+          Not financial advice.<br>Investing involves risk.
+        </p>
+      </div>
+    </aside>
+
+    <!-- ═══ WORKSPACE ═══ -->
+    <main class="flex-1 flex flex-col min-w-0 min-h-0 bg">
+
+      <!-- mobile nav -->
+      <nav class="mobile-nav">
+        <button data-screen="home" class="mobile-nav-btn active" aria-pressed="true">Home</button>
+        <button data-screen="portfolio" class="mobile-nav-btn" aria-pressed="false">Portfolio</button>
+        <button data-screen="ask" class="mobile-nav-btn" aria-pressed="false">Ask</button>
+      </nav>
+
+      <!-- ═══ HOME ═══ -->
+      <section id="screen-home" class="screen flex-1 flex-col min-h-0">
+        <div class="flex-1 min-h-0 overflow-y-auto">
+          <div class="home-container">
+
+            <!-- Portfolio snapshot -->
+            <div id="snapshot-card" class="snapshot-card">
+              <div class="snapshot-main">
+                <div class="text-xs text-muted uppercase" style="letter-spacing:.06em">Your portfolio</div>
+                <div id="snapshot-pnl" class="snapshot-pnl">—</div>
+                <div id="snapshot-line" class="text-sm text-muted mt-1">Loading…</div>
+              </div>
+              <div class="snapshot-side">
+                <div><div class="text-xs text-muted">Positions</div><div id="snapshot-count" class="snapshot-stat">–</div></div>
+                <div><div class="text-xs text-muted">Win rate</div><div id="snapshot-winrate" class="snapshot-stat">–</div></div>
+              </div>
+            </div>
+
+            <!-- Today's picks -->
+            <h2 class="section-heading">Today's picks</h2>
+            <div id="picks-empty" class="empty-state">
+              <p class="text-muted">No new picks today. Your active positions are unchanged.</p>
+            </div>
+            <div id="picks-grid" class="picks-grid hidden"></div>
+
+            <p class="home-disclaimer">Research tool, not financial advice. Investing involves risk.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ PORTFOLIO ═══ -->
+      <section id="screen-portfolio" class="screen hidden flex-1 flex-col min-h-0">
+        <div class="flex-1 min-h-0 overflow-y-auto">
+          <div class="home-container">
+            <div id="portfolio-content"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ ASK ═══ -->
+      <section id="screen-ask" class="screen hidden flex-1 flex-col min-h-0">
+        <div id="ask-transcript" class="chat-transcript">
+          <div id="ask-empty" class="ask-empty">
+            <h3 class="ask-empty-title">Ask Reflex</h3>
+            <p class="text-sm text-muted mb-4">Questions you might want to ask:</p>
+            <div id="ask-suggestions" class="ask-suggestions"></div>
+          </div>
+        </div>
+        <form id="ask-form" class="chat-input-bar">
+          <input id="ask-input" type="text" autocomplete="off" spellcheck="false" placeholder="Ask about a pick or your portfolio…" class="chat-input">
+          <button id="ask-send" type="submit" class="btn btn-primary">Ask</button>
+        </form>
+      </section>
+
+      <!-- ═══ PICK DETAIL (overlay) ═══ -->
+      <section id="screen-pick" class="screen hidden flex-1 flex-col min-h-0">
+        <div class="flex-1 min-h-0 overflow-y-auto">
+          <div class="home-container">
+            <button id="pick-back" class="btn-ghost text-xs mb-3">← Back</button>
+            <div id="pick-detail-content"></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{% static 'webapp/app.js' %}?v=10"></script>{% endblock %}

@@ -1,10 +1,12 @@
 """Fix B migration: Rename non-dated open_trade/watchlist files to YYYY-MM-DD--TICKER.md format."""
+
 import os, re
 from datetime import datetime
 from pathlib import Path
 
 AGENT_FS = Path("D:\\Fasset\\agent_fs\\memories")
 DATED_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}--.+\.md$")
+
 
 def migrate_dir(subdir):
     d = AGENT_FS / subdir
@@ -26,6 +28,7 @@ def migrate_dir(subdir):
         fp.rename(dest)
         actions.append((fp.name, new_name))
     return actions
+
 
 print("=== Open Trades ===")
 for old, new in migrate_dir("open_trades"):
