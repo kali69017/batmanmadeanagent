@@ -179,9 +179,9 @@ LIST_2 = ["AAPL", "MSFT", "NVDA", "GOOG", "META"]
 # The agent screens and validates against WATCHLIST. To switch between the
 # 5-ticker test list and the full 136-ticker list, change ONLY the right-hand
 # side of this ONE assignment:
-#   LIST_2          → 5-ticker test list (current, for testing)
-#   FULL_WATCHLIST  → all 136 tickers (production)
-WATCHLIST = LIST_2
+#   LIST_2          → 5-ticker test list (for testing)
+#   FULL_WATCHLIST  → all 136 tickers (production, current)
+WATCHLIST = FULL_WATCHLIST
 
 
 def get_watchlist(mode: str = "full") -> list[str]:
