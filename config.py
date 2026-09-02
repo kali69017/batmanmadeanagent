@@ -124,50 +124,108 @@ WATCHLIST = sorted(
 FASSET_WATCHLIST = sorted(WATCHLIST)
 
 # Expanded list — additional liquid, well-known tickers for broader coverage.
-EXPANDED_WATCHLIST = sorted(
-    [
-        # Mega/Semis
-        "INTC", "QCOM", "TXN", "MU", "LRCX", "AMAT", "KLAC",
-        # Software / Cloud / Cyber
-        "NOW", "PANW", "CRWD", "WDAY", "DDOG", "NET", "PLTR", "ZS", "TEAM",
-        # Fintech / Payments
-        "MA", "PYPL", "SQ", "COIN", "HOOD",
-        # Banks / Finance
-        "JPM", "BAC", "GS", "MS", "BLK", "SCHW", "C", "WFC",
-        # Healthcare / Biotech
-        "LLY", "UNH", "BMY", "GILD", "ISRG", "VRTX", "REGN", "TMO", "DHR",
-        # Energy
-        "COP", "SLB", "EOG", "MPC", "OXY", "KMI",
-        # Consumer / Retail
-        "WMT", "COST", "TGT", "MCD", "SBUX", "LOW", "BKNG", "ORLY",
-        # Industrial / Aerospace
-        "BA", "GE", "LMT", "HON", "UNP", "DE", "ETN", "ITW",
-        # Media / Telecom
-        "NFLX", "DIS", "T", "VZ", "TMUS", "SPOT",
-        # EV / Auto
-        "F", "RIVN",
-        # Materials / Mining
-        "FCX", "NEM",
-        # Utilities
-        "DUK", "SO", "NEE",
-        # REITs
-        "O", "SPG", "AMT",
-        # China Tech / ADRs
-        "BABA", "JD",
-        # Other large-cap
-        "BAH", "LULU", "DKNG", "CVNA",
-        # Semis / AI adjacent
-        "MRVL", "ANET", "SMCI",
-        # Oil & Gas majors
-        "BP", "SHEL",
-        # Aerospace & Defense
-        "RTX", "NOC",
-        # Food & Beverage
-        "KO", "PEP",
-        # Pharma
-        "NVS",
-    ]
-)
+EXPANDED_WATCHLIST = sorted([
+    "A", "AA", "AAL", "AAON", "AAPL", "ABBV", "ABNB", "ABT", "ACAD", "ACI",
+    "ACIW", "ACLS", "ACN", "ADBE", "ADC", "ADEA", "ADI", "ADM", "ADP", "ADSK",
+    "AEE", "AEHR", "AEIS", "AEM", "AEO", "AEP", "AES", "AFG", "AFL", "AFRM",
+    "AG", "AGYS", "AI", "AIG", "AIZ", "AJG", "AKAM", "ALAB", "ALB", "ALGM",
+    "ALGN", "ALGT", "ALK", "ALKS", "ALL", "ALLE", "ALNY", "ALRM", "AMAT", "AMBA",
+    "AMD", "AME", "AMKR", "AMT", "AMZN", "AN", "ANET", "ANF", "ANGI", "AON",
+    "AOS", "APA", "APD", "APH", "APLD", "APO", "APPF", "APPN", "APPS", "AR",
+    "ARCB", "ARE", "ARES", "ARM", "ARVN", "ARW", "ARWR", "ASAN", "ASH", "ASML",
+    "ASO", "ASTS", "ASX", "ATHM", "ATO", "ATRC", "AU", "AVAV", "AVGO", "AVPT",
+    "AVT", "AVY", "AWK", "AXON", "AXP", "AXTI", "AZN", "AZO", "BA", "BABA",
+    "BAC", "BAH", "BALL", "BAM", "BAND", "BAP", "BAX", "BB", "BBD", "BBVA",
+    "BBWI", "BBY", "BCS", "BDC", "BDX", "BE", "BEAM", "BELFA", "BELFB", "BEN",
+    "BG", "BGS", "BHE", "BHP", "BIDU", "BIIB", "BILI", "BILL", "BJ", "BKNG",
+    "BKR", "BLDP", "BLK", "BLKB", "BLSH", "BMBL", "BMI", "BMO", "BMRN", "BMY",
+    "BNS", "BNTX", "BOOT", "BOX", "BP", "BR", "BRZE", "BSBR", "BSP", "BSX",
+    "BSY", "BTI", "BUD", "BURL", "BX", "BXP", "C", "CACI", "CAG", "CAKE",
+    "CALM", "CAMT", "CAR", "CARR", "CASY", "CAT", "CB", "CBRS", "CC", "CCC",
+    "CCI", "CCJ", "CCK", "CCL", "CCOI", "CDNS", "CDW", "CE", "CEG", "CELH",
+    "CF", "CFG", "CGNX", "CHD", "CHEF", "CHKP", "CHRD", "CHRW", "CHTR", "CHWY",
+    "CHYM", "CI", "CIB", "CIEN", "CIFR", "CINF", "CL", "CLBT", "CLF", "CLS",
+    "CLX", "CM", "CMC", "CMCSA", "CMG", "CMI", "CMS", "CNA", "CNC", "CNI",
+    "CNQ", "CNX", "COF", "COHR", "COHU", "COIN", "COKE", "COO", "COP", "CORZ",
+    "COST", "CP", "CPAY", "CPB", "CPT", "CR", "CRDO", "CRL", "CRM", "CROX",
+    "CRS", "CRSP", "CRUS", "CRWD", "CRWV", "CSCO", "CSL", "CSQR", "CSX", "CTAS",
+    "CTSH", "CTVA", "CUBE", "CUZ", "CVE", "CVLT", "CVNA", "CVS", "CVX", "CW",
+    "CX", "D", "DAL", "DAR", "DBX", "DD", "DDOG", "DE", "DECK", "DELL",
+    "DEO", "DG", "DGII", "DHI", "DHR", "DIN", "DIOD", "DIS", "DKNG", "DKS",
+    "DLO", "DLR", "DLTR", "DNN", "DOC", "DOCN", "DOCU", "DOMO", "DOV", "DOW",
+    "DOX", "DPZ", "DRI", "DSGX", "DT", "DTE", "DUK", "DUOL", "DV", "DVN",
+    "DXC", "DXCM", "E", "EBAY", "ECL", "EDU", "EEFT", "EGHT", "EGP", "EIX",
+    "EL", "ELV", "EME", "EMN", "EMR", "ENB", "ENPH", "ENTG", "EOG", "EPAM",
+    "EPD", "EQIX", "EQNR", "EQT", "ERIC", "ERIE", "ES", "ESE", "ESS", "ESTC",
+    "ET", "ETN", "ETR", "ETSY", "EVER", "EVRG", "EVTC", "EW", "EWBC", "EXC",
+    "EXEL", "EXLS", "EXPD", "EXPE", "EXR", "EXTR", "F", "FANG", "FAST", "FCX",
+    "FDX", "FE", "FFIV", "FHN", "FICO", "FIG", "FIS", "FISV", "FITB", "FIVE",
+    "FIVN", "FIZZ", "FLEX", "FLO", "FMC", "FMX", "FN", "FND", "FNV", "FORM",
+    "FOUR", "FOXA", "FR", "FROG", "FRSH", "FRT", "FSLR", "FSLY", "FTI", "FTNT",
+    "FTV", "FUL", "FWONK", "FWRD", "G", "GATX", "GBX", "GD", "GDDY", "GE",
+    "GEHC", "GEN", "GFI", "GFS", "GGAL", "GGG", "GIB", "GILD", "GIS", "GKOS",
+    "GL", "GLOB", "GLPI", "GLW", "GM", "GNRC", "GO", "GOLD", "GOOGL", "GPC",
+    "GPI", "GPN", "GRAB", "GRMN", "GRND", "GS", "GSAT", "GSK", "GTES", "GTLB",
+    "GWRE", "GWW", "HAIN", "HAL", "HALO", "HAS", "HBAN", "HCA", "HD", "HDB",
+    "HEI", "HELE", "HIG", "HII", "HIW", "HL", "HLT", "HMC", "HMN", "HON",
+    "HOOD", "HPE", "HPP", "HPQ", "HSBC", "HST", "HSY", "HTZ", "HUBG", "HUBS",
+    "HUM", "HUN", "HUYA", "HWM", "HXL", "IBM", "IBN", "ICHR", "ICUI", "IDCC",
+    "IDXX", "IEX", "IFF", "ILMN", "IMKTA", "IMO", "IMVT", "INCY", "INFQ", "INFY",
+    "INGM", "INGR", "INSM", "INSP", "INTA", "INTC", "INTU", "INVH", "IONQ", "IONS",
+    "IOT", "IP", "IPGP", "IQ", "IQMX", "IQV", "IRDM", "IRM", "IRTC", "ISRG",
+    "IT", "ITRI", "ITUB", "ITW", "IVZ", "J", "JAZZ", "JBHT", "JBL", "JBLU",
+    "JBS", "JCI", "JD", "JJSF", "JKHY", "JNJ", "JPM", "KBR", "KC", "KD",
+    "KDP", "KEY", "KEYS", "KGC", "KHC", "KIM", "KKR", "KLAC", "KLIC", "KMB",
+    "KMI", "KMPR", "KMX", "KN", "KNX", "KO", "KR", "KRC", "KRO", "KROS",
+    "KSPI", "KSS", "KTOS", "KVUE", "KVYO", "L", "LAD", "LAMR", "LCID", "LDOS",
+    "LEN", "LEVI", "LFUS", "LHX", "LI", "LIF", "LII", "LIN", "LITE", "LLY",
+    "LMT", "LNC", "LNT", "LOGI", "LOW", "LPL", "LRCX", "LSCC", "LSTR", "LULU",
+    "LUMN", "LUV", "LYB", "LYFT", "LYG", "LYV", "M", "MA", "MAA", "MANH",
+    "MAR", "MAS", "MAT", "MBGL", "MCD", "MCHP", "MDB", "MDLZ", "MDT", "MET",
+    "META", "MFC", "MFG", "MGY", "MHK", "MIDD", "MKL", "MKSI", "MLM", "MMM",
+    "MNDY", "MNST", "MO", "MOG-A", "MOH", "MOMO", "MOS", "MPC", "MPWR", "MRK",
+    "MRNA", "MRVL", "MS", "MSFT", "MSI", "MSTR", "MTB", "MTCH", "MTD", "MTDR",
+    "MTSI", "MU", "MXL", "NATL", "NAVN", "NBIX", "NCLH", "NCNO", "NDSN", "NEE",
+    "NEM", "NET", "NFLX", "NGG", "NI", "NICE", "NIO", "NIQ", "NKE", "NMR",
+    "NNN", "NOC", "NOG", "NOK", "NOV", "NOVT", "NOW", "NSC", "NSIT", "NTAP",
+    "NTCT", "NTDOY", "NTES", "NTLA", "NTNX", "NTR", "NTRS", "NTSK", "NUE", "NVAX",
+    "NVCR", "NVDA", "NVMI", "NVR", "NVS", "NWG", "NXPI", "NXT", "O", "OCTV",
+    "ODFL", "OKE", "OKTA", "OLED", "OLLI", "OLN", "OMCL", "ON", "ONB", "ONTO",
+    "OPFI", "ORCL", "ORI", "ORLY", "OSIS", "OTEX", "OTIS", "OUST", "OVV", "OXY",
+    "P", "PAAS", "PAG", "PAGS", "PANW", "PARA", "PATH", "PAY", "PAYC", "PAYP",
+    "PAYX", "PB", "PBR", "PCAR", "PCG", "PCOR", "PCTY", "PCVX", "PD", "PDD",
+    "PEG", "PEGA", "PEN", "PENG", "PEP", "PFE", "PFG", "PFGC", "PG", "PGR",
+    "PH", "PHM", "PI", "PINS", "PKG", "PLD", "PLTK", "PLTR", "PLUG", "PLXS",
+    "PM", "PNC", "PNR", "PNW", "PODD", "PONY", "POOL", "POWI", "PPG", "PPL",
+    "PR", "PRU", "PSA", "PSN", "PSO", "PSX", "PTC", "PTRN", "PUBM", "PVH",
+    "PWR", "PYPL", "Q", "QBTS", "QCOM", "QLYS", "QRVO", "QSR", "QTWO", "RAL",
+    "RARE", "RBRK", "RCL", "REG", "REGN", "RELX", "RELY", "REXR", "RF", "RGA",
+    "RGEN", "RH", "RIO", "RIVN", "RJF", "RKLB", "RL", "RMBS", "RMD", "RNG",
+    "ROK", "ROKU", "ROL", "ROP", "ROST", "RPD", "RRC", "RS", "RSG", "RTX",
+    "RUN", "RVLV", "RXO", "RXRX", "RY", "RYTM", "S", "SAH", "SAIA", "SAIC",
+    "SAIL", "SAN", "SANM", "SAP", "SBAC", "SBUX", "SCCO", "SCHW", "SCL", "SEDG",
+    "SFM", "SFTBY", "SHAK", "SHEL", "SHOO", "SHOP", "SHW", "SIGI", "SIMO", "SITM",
+    "SJM", "SKHY", "SKYW", "SLAB", "SLB", "SLF", "SM", "SMCI", "SMFG", "SMTC",
+    "SNAP", "SNDK", "SNDR", "SNOW", "SNPS", "SNX", "SNY", "SO", "SOFI", "SONY",
+    "SPG", "SPOT", "SPSC", "SPT", "SRAD", "SRE", "SRPT", "SSNC", "SSRM", "ST",
+    "STAG", "STE", "STLA", "STLD", "STM", "STT", "STX", "STZ", "SU", "SUZ",
+    "SWK", "SWKS", "SYF", "SYK", "SYNA", "SYY", "T", "TAL", "TAP", "TCEHY",
+    "TCOM", "TD", "TDC", "TDG", "TDY", "TEAM", "TECH", "TEL", "TENB", "TER",
+    "TFC", "TFX", "TGT", "THG", "TJX", "TM", "TMO", "TMUS", "TNDM", "TOL",
+    "TOST", "TPR", "TRGP", "TRMB", "TRN", "TRNO", "TROW", "TROX", "TRV", "TSCO",
+    "TSEM", "TSLA", "TSM", "TSN", "TTAN", "TTD", "TTE", "TTMI", "TTWO", "TU",
+    "TWLO", "TXN", "TXRH", "TXT", "TYL", "U", "UA", "UAL", "UBER", "UCTT",
+    "UDR", "UEC", "UFCS", "UGA", "UHS", "UI", "UL", "ULCC", "ULTA", "UMC",
+    "UNFI", "UNG", "UNH", "UNP", "UPS", "UPST", "URBN", "USB", "USFD", "USO",
+    "UTHR", "V", "VALE", "VECO", "VEEV", "VERA", "VFC", "VIAV", "VICI", "VICR",
+    "VIPS", "VIV", "VKTX", "VLO", "VLY", "VMC", "VNOM", "VNT", "VOD", "VRNS",
+    "VRSN", "VRTX", "VSAT", "VSH", "VST", "VZ", "W", "WAB", "WAT", "WB",
+    "WBD", "WCN", "WDAY", "WDC", "WEC", "WELL", "WERN", "WEX", "WFC", "WING",
+    "WIT", "WIX", "WK", "WLK", "WM", "WMB", "WMK", "WMT", "WOLF", "WOR",
+    "WPM", "WRB", "WSE", "WSM", "WST", "WTS", "WTW", "WU", "WWD", "XENE",
+    "XOM", "XPEV", "XPO", "XRAY", "XYL", "XYZ", "YELP", "YETI", "YEXT", "YMM",
+    "YOU", "YUM", "ZBH", "ZBRA", "ZETA", "ZION", "ZM", "ZS", "ZTO", "ZTS"
+])
 
 # Full scan — the union of Fasset and Expanded lists (100+ tickers).
 FULL_WATCHLIST = sorted(set(FASSET_WATCHLIST) | set(EXPANDED_WATCHLIST))

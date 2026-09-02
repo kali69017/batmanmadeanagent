@@ -80,9 +80,15 @@ def _outcome_win(fm: dict) -> bool | None:
     return None
 
 
-def _known_signals() -> dict[str, str]:
-    """signal name -> current notes text, from the shared signals_log dir."""
-    out: dict[str, str] = {}
+def _known_signals() -> dict[str, tuple[str, Path]]:
+    """signal name -> (current notes text, file path), from signals_log dir.
+
+    The file path is returned so callers never have to reconstruct it from the
+    `signal:` field — the frontmatter value can differ from the on-disk
+    filename (e.g. it may contain spaces), which used to produce a
+    FileNotFoundError.
+    """
+    out: dict[str, tuple[str, Path]] = {}
     signals_dir = config.SHARED_MEMORY_ROOT / "signals_log"
     if not signals_dir.is_dir():
         return out
@@ -91,7 +97,7 @@ def _known_signals() -> dict[str, str]:
         fm = parse_frontmatter(raw)
         name = (fm.get("signal") or fp.stem).strip()
         if name:
-            out[name] = fm.get("notes") or ""
+            out[name] = (fm.get("notes") or "", fp)
     return out
 
 
@@ -159,15 +165,19 @@ def reinforce_learning() -> dict:
     summary = {}
 
     for name in all_names:
-        fp = signals_dir / f"{name}.md"
-        recorded_correct, recorded_false = _read_recorded_counts(fp)
+        notes, fp = known.get(name, ("", signals_dir / f"{name}.md"))
+        if fp.exists():
+            recorded_correct, recorded_false = _read_recorded_counts(fp)
+        else:
+            # Brand-new signal (no file yet) — nothing recorded to seed from.
+            recorded_correct, recorded_false = 0, 0
         wins = explicit.get(name)
         if wins is not None and wins:
             correct = sum(1 for w in wins if w)
             false = len(wins) - correct
         else:
             correct, false = recorded_correct, recorded_false
-        _write_signal_file(fp, name, correct, false, known.get(name, ""))
+        _write_signal_file(fp, name, correct, false, notes)
         total = correct + false
         win_rate = round(correct / total, 3) if total else None
         SignalLog.objects.update_or_create(
@@ -176,7 +186,7 @@ def reinforce_learning() -> dict:
                 "triggered_correctly": correct,
                 "triggered_falsely": false,
                 "win_rate": win_rate,
-                "notes": known.get(name, ""),
+                "notes": notes,
             },
         )
         summary[name] = {

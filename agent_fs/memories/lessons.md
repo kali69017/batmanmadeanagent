@@ -91,7 +91,9 @@
 - This is distinct from Lesson #1 (OBV divergence + negative CMF = dealbreaker for open
   trades). This applies pre-entry: don't even enter if OBV is diverging.
 
-### 18. Positive CMF Is the Non-Negotiable Gate for Energy Mean-Reversion
+### 17. (Reserved — numbering gap from earlier session, intentionally skipped)
+
+  ### 18. Positive CMF Is the Non-Negotiable Gate for Energy Mean-Reversion
 - CVX was rejected on 2026-07-08 with CMF -0.10 ("negative CMF is the killer"). Same CVX setup
   three weeks later with CMF +0.115 hit T1 in two days (+1.3%). XOM went 2-for-2 (July 7 +2.97%,
   July 10 +0.53%) when CMF was positive, 0-for-1 when the zone was placed but never triggered.
@@ -411,3 +413,404 @@
       - **Rule: "CMF > 0" as a gate means meaningfully positive (roughly CMF > +0.05 for a
         fresh entry). A CMF barely above zero carries no accumulation conviction and should
         be treated as a fail. Require ADX > 20 alongside before upgrading a marginal-CMF name.**
+
+### 42. Full Scan Returned Only 5 Tickers = Extreme Narrow Breadth (2026-08-17)
+  - The full scan (mode='full') returned only 5 tickers with all composite scores < 30
+    (NVDA 29.2, META 25.3, GOOG 23.2, AAPL 19.3, MSFT 15.2). This is the narrowest
+    breadth yet observed — earlier sessions produced 10+ candidates, and even the
+    "narrow market" stretch (8/07-8/11) produced a full top-10 list.
+  - **Rule: When a full scan returns a shrunken candidate list AND all scores < 30,
+    the market is structurally selective. Do not force fills — the correct move is
+    watchlist/pending placement with hard gates, not entries.**
+
+### 43. NVDA: Elite FA Cannot Override Overbought + Slight Distribution (2026-08-17)
+  - NVDA's FA is the best on the board (PEG 0.62, 215% EPS growth, 114% ROE, quant 72),
+    but StochRSI 93.6 (overbought) + CMF -0.03 (slight distribution) violate the
+    non-negotiable CMF gate and Lesson #14 (strong trend + overbought = wait). This is
+    a repeat of Lesson #17 (overbought + weak ADX = pullback risk) — same NVDA, same
+    overbought entry-timing problem.
+  - **Rule: A pullback entry zone is only actionable if BOTH gates clear at trigger time:
+    CMF > 0 AND StochRSI cooled below ~80. Do not chase overbought strength regardless of
+    FA quality.**
+
+### 44. META/GOOG: Oversold CCI + OBV Divergence Is a Trap Without Positive CMF (2026-08-17)
+  - META (CCI -2152, bullish OBV divergence, but CMF -0.05 + death cross) and GOOG
+    (CCI -1664.7, but CMF -0.152 + OBV divergence -80.6%) both flashed "oversold bounce"
+    setups that the expert subagents rated "long." Both are REJECTED: the CMF distribution
+    + death-cross/OBV-divergence combination is the exact same fatal pattern as META 7/30
+    (-8.7% same-day stop-out).
+  - **Rule: Oversold oscillators (CCI < -1000, StochRSI < 10) are NOT a standalone buy
+    signal. Without CMF > 0 (and no death cross), they signal continuation, not reversal.
+    The expert subagent will sometimes rate these "long" — the CMF/death-cross filter
+    overrides the expert's verdict. Trust the filter, not the narrative.**
+
+  ### 45. Breadth Recovery With All-Energy Top-10 = Rotation, But Entries Still Gated (2026-08-17)
+    - Full scan (132 tickers) returned 10 candidates (vs only 5 on 8/16) with 5 scores above
+      30 — breadth clearly recovered. But the top-10 is dominated by Energy (EOG, CVX, COP,
+      OXY, BP = 5 of 10), confirming the ongoing Energy rotation (Lesson #27).
+    - Every single Energy candidate is either overbought (CVX StochRSI 85.3, COP Stoch %K 91.1)
+      or trend-less (EOG ADX 14.6 + Aroon bearish, OXY ADX 18.9, BP ADX 16.1 + MACD bearish).
+    - The rotation signal is real, but the entry timing is not ripe — the sector has already
+      run (CVX completed a full T1+T2 winner on 8/14) and now needs to consolidate/pull back.
+    - **Rule: When a rotated sector's names all arrive in the top-10 ALREADY overbought or
+      trend-less, the rotation has largely played out for the near term. Place pullback/pending
+      entries (not market orders) and watchlist the trend-less names with ADX > 20 as the
+      re-entry trigger. Do not chase the sector at extended levels.**
+    - This extends Lesson #37: breadth recovery + all-Energy top-10 ≠ everything is buyable.
+      The sector leader (CVX) already paid; the followers (COP, EOG, OXY, BP) are either
+      extended or trend-less. Patience: the sector will offer better entries on a pullback.
+
+  ### 46. Pending Entry Degradation — CMF Can Flip While You Wait (COP 2026-08-18)
+    - COP was placed as pending on 8/17 with CMF +0.121 (strong accumulation). By 8/18, the
+      CMF had flipped to distribution (-35.8 volume oscillator). StochRSI also worsened from
+      77.5 to 81.0 (overbought). The bullish structure (golden cross, SMA stack) remains
+      intact but the flow has turned — the pending entry zone is now gated by a condition
+      that didn't exist when it was placed.
+    - **Rule: Pending entries are not static. Re-check all gates every session. A CMF flip
+      from positive to negative is a material degradation — add a new gate or widen the
+      entry zone downward. If the degradation persists for 3+ sessions, expire the pending
+      and wait for a fresh signal.**
+
+  ### 47. Death-Cross Reversal Pattern Validated — BABA Entry (2026-08-18)
+    - BABA entered at $128.08: death cross aging (SMA50 $113.72 rising toward SMA200 $137.68),
+      ADX 29.8 (strong trend), CMF +0.153 (strong accumulation), Aroon 80/4 (bullish),
+      StochRSI 17.2 (oversold coiled-spring). This is the first dedicated trigger of the
+      death_cross_strong_adx_cmf_positive signal.
+    - **Rule: The death-cross reversal signal is now live with its own signal log. Entry
+      requirements: (1) death cross active but SMA50 rising, (2) ADX > 25, (3) CMF > 0,
+      (4) StochRSI not overbought. Size at half for non-US-listed ADRs with geopolitical
+      risk.**
+
+  ### 48. NVDA Inside Zone But Both Gates Fail — The System Holds (2026-08-18)
+    - NVDA at $221.00 is inside the pending entry zone ($211.48-222) for the first time.
+      Elite FA (PEG 0.62, 215% EPS growth, 63% margins, 114% ROE). But both gates fail:
+      CMF 0.002 (< 0.05) and StochRSI 88.9 (> 80). The doji candle reinforces indecision.
+    - **Rule: When a ticker is inside the entry zone but both CMF and StochRSI gates fail,
+      do not enter. FA quality is not a gate override. The gates exist to prevent entering
+      at the wrong moment. This is the strongest test yet of the CMF gate (Lesson #28).**
+
+### 49. Parabolic Momentum (>200% 12-1) + Negative CMF = Distribution Into Strength (MU 2026-08-19)
+  - MU screens #1 yet again (composite 31.6) on momentum_12_1 of 500.91% — a parabolic
+    12-month run (52wk range $113.28-$1254.81, 6mo +125%). But CMF -0.073, ADX 13.4,
+    OBV bearish divergence (price +123.5% vs OBV +29%). The 500% momentum is itself a
+    red flag: gains that parabolic are being distributed, not accumulated.
+  - Rule: When momentum_12_1 exceeds ~200%, discount the momentum component of the
+    composite score entirely — a parabolic past is not a bullish signal. Reject unless
+    CMF > 0 AND ADX > 20, the same two gates every candidate must pass.
+  - Also: EOG reached a fresh 52-week high ($150.55) with CMF +0.158 (strong accumulation)
+    but ADX 16.1 + StochRSI 80.3. Positive CMF alone does not justify chasing a 52-week-high
+    breakout with no trend and overbought oscillators (extends Lesson #45: rotated-sector
+    names arriving already extended = wait for pullback, not market order).
+
+### 50. Golden Cross + Oversold + Positive CMF Works in Financials Too (BAC 2026-08-20)
+  - BAC triggered the golden_cross_oversold_cmf_positive signal: golden cross (SMA50 > SMA200),
+    CMF +0.098 (strong accumulation), StochRSI 8.7 (deeply oversold). Prior validation was
+    100% energy/defensive (XOM 2x, CVX 1x). BAC at $62.89 is the first Financials test of
+    this 3-for-3 signal.
+  - **Rule: The golden cross + positive CMF + oversold StochRSI pattern is NOT sector-specific.
+    It's a structural mean-reversion pattern that works wherever all three conditions align.
+    Size normally outside energy/defensive but monitor for any sector-specific behavior
+    divergence.**
+  - Also: DELL was rejected for the 8th+ time on CMF -0.063 + ADX 11.9 (Lesson #1/#2),
+    C watchlisted on CMF -0.041 + ADX 15.2 (same pattern), DAL rejected on CMF -0.277 +
+    StochRSI 0.0 (Lesson #7 continuation trap confirmed). The BAC entry stands out because
+    it's the only candidate where ALL gates cleared simultaneously.
+
+### 51. COP Pending Zone Blown Through — Pending Entries Have a Shelf Life (2026-08-20)
+  - COP pending zone ($123.63-125) was placed 8/17 when price was $128.57. Three sessions
+    later price is $134.65 (+7.7% above zone top) at a fresh 52-week high. The pullback
+    entry was fundamentally sound but the market didn't offer the pullback — momentum
+    continued without pausing.
+  - **Rule: When a pending entry zone is >5% above the zone top with no pullback after
+    3 sessions, the zone is no longer realistic. Either expire it or widen it downward
+    to a new support level. Don't let stale pending entries accumulate indefinitely —
+    they clog the portfolio with non-actionable noise.**
+  - This extends Lesson #20 (zone width must be ≥ 2× ATR) and Lesson #34 (pending entries
+    placed near 52-week highs during strong uptrends almost never trigger).
+
+  ### 52. Expert Subagent Can Recommend LONG on Fatal Patterns — Trust the System Filters (2026-08-21)
+    - Three candidates (C, DAL, AVGO) received LONG recommendations from the financial-expert
+      subagent. All three were REJECTED by system filters: C (CMF -0.072 + ADX 16.1), DAL
+      (CMF -0.335 + D/E 97x), AVGO (OBV divergence + CMF -0.123 + ADX 19.2 — same fatal
+      pattern as its 7/30 stop-out). The expert subagent sees oversold oscillators + strong
+      FA and recommends entry, but the system's accumulated lessons correctly identify these
+      as continuation traps (Lesson #7), no-trend setups (Lesson #2), and OBV-divergence
+      dealbreakers (Lesson #1/#16).
+    - **Rule: The financial-expert subagent is an advisor, not the decision-maker. When the
+      expert recommends LONG but CMF is negative AND ADX < 20, the system filter overrides.
+      The expert's job is to synthesize TA+FA — the system's job is to apply the hard-won
+      filters that the expert doesn't always weigh heavily enough. Trust the filters.**
+    - This is the mirror image of Lesson #44 (expert rated META/GOOG long but CMF/death-cross
+      filter overrode). The pattern is now confirmed across multiple sessions and tickers.
+
+  ### 53. NVDA Gate Dynamics: One Gate Improving While Another Deteriorates (2026-08-21)
+    - NVDA: StochRSI collapsed from 88.9 to 13.4 (gate now PASSES — oversold is better than
+      overbought for entry timing). But CMF flipped from +0.002 to -0.142 (gate now FAILS
+      harder — distribution intensified). The net effect: the entry is still blocked, just
+      by a different gate. Price is inside the zone at $217.57.
+    - **Rule: When one gate improves but another deteriorates, the entry is still blocked.
+      Both gates must pass simultaneously. A gate improvement is encouraging but doesn't
+      compensate for a gate deterioration — they are independent conditions.**
+    - This is a new dynamic not previously observed: gate rotation rather than gate clearance.
+
+  ### 54. AVGO: Same Fatal Pattern 22 Days After Stop-Out — Patterns Persist (2026-08-21)
+    - AVGO stopped out 7/30 on OBV divergence + negative CMF + ADX 15.7. On 8/21, the
+      pattern is nearly identical: OBV divergence (price +12.8% vs OBV -21.7%), CMF -0.123,
+      ADX 19.2. The only difference: StochRSI is now deeply oversold (8.0 vs prior levels)
+      and price is at SMA200 support instead of below it. But the core dealbreakers haven't
+      changed — the stock is still being distributed.
+    - **Rule: A stop-out pattern that persists 3+ weeks later is structural, not temporary.
+      Don't re-enter until ALL dealbreaker conditions have cleared, not just some of them.
+      Oversold at support is not a reason to override OBV divergence + negative CMF.**
+
+  ### 55. Death-Cross Reversals Bleed Faster Than Golden-Cross Setups — Tighter Stops Needed (BABA 2026-08-21)
+    - BABA entered at $128.08 with all gates green: ADX 29.8, CMF +0.153, StochRSI 17.2,
+      Aroon 80/4 — a textbook death_cross_strong_adx_cmf_positive trigger. In just 3
+      sessions, the cushion collapsed: $4.40 (3.6%) → $3.71 (3.0%) → $0.83 (0.7%). The
+      stop distance (7.5% from entry) was too generous — the death-cross structural
+      headwind means these setups either work quickly or the death cross reasserts.
+    - **Rule: Death-cross reversals need tighter stops than golden-cross setups. Max stop
+      distance: 5% from entry (not 7-8%). Exit faster if the bounce doesn't materialize
+      within 3-5 sessions. The structural headwind is real even when all gates pass.**
+    - This extends Lesson #35 (take 75% at T1 for death-cross plays) with a stop-sizing
+      corollary: tighter stops, faster exits. The death cross is not a neutral backdrop.
+
+  ### 56. Golden Cross + Oversold + CMF Pattern Extends to Financials But Works Slower (BAC 2026-08-21)
+    - BAC is the first Financials test of the golden_cross_oversold_cmf_positive signal
+      (3-for-3 in Energy: XOM 2x, CVX 1x). After 1 session: -1.9%, cushion narrowed from
+      3.0% to 1.9%. The Energy winners popped in 1-2 days; BAC is grinding. Lower
+      volatility (21.5% vs Energy's 26%) and the 2% dividend yield mean the mean-reversion
+      bounce may need 3-5 sessions, not 1-2.
+    - **Rule: The golden cross + oversold + positive CMF pattern is sector-transferable,
+      but timing expectations differ. Energy names (high beta, commodity-driven) mean-revert
+      sharply. Financials (lower vol, yield-supported) grind. Allow 3-5 sessions before
+      judging the setup as failing. The signal isn't broken — the clock is different.**
+
+  ### 57. StochRSI Collapse + Simultaneous CMF Deterioration = Distribution, Not Entry (NVDA 2026-08-21)
+    - NVDA's StochRSI collapsed from 88.9 → 13.4 (massive cooldown — looks like a buy
+      signal), but CMF simultaneously flipped from +0.002 → -0.142 (distribution intensified).
+      The StochRSI cooldown in the presence of accelerating negative CMF means sellers are
+      in control — the oversold condition signals continuation, not reversal (extends
+      Lesson #7: oversold + negative CMF = continuation).
+    - This is a new variant: **gate rotation** — one gate improving while another deteriorates.
+      It's not net-neutral; the CMF deterioration outweighs the StochRSI improvement because
+      CMF is the higher-signal filter (Lesson #28).
+    - **Rule: When StochRSI improves but CMF simultaneously deteriorates, the entry remains
+      blocked. CMF is the dominant gate. Improving oscillator + worsening flow = distribution
+      confirmation, not an entry signal. The oscillator is telling you it's "safe" while
+      CMF is screaming that sellers are in control. Trust CMF.**
+
+  ### 58. Death Cross + Positive CMF + Strong ADX Failed on China ADR — Geopolitical Risk Premium (BABA 2026-08-24)
+    - BABA entered 8/18 at $128.08 with all gates green: ADX 29.8, CMF +0.153, StochRSI 17.2,
+      Aroon 80/4 — a textbook death_cross_strong_adx_cmf_positive trigger. Stopped out 8/24
+      at $118.28 (-7.65%). The death cross headwind + China ADR geopolitical risk overwhelmed
+      the positive CMF and strong ADX. The signal is now 1-for-2 (50%).
+    - **Rule: For China ADRs and other geopolitically-sensitive names, require a golden cross
+      (not just an aging death cross) before entering, regardless of ADX/CMF strength. The
+      death cross structural headwind combined with geopolitical risk creates a compounding
+      effect that positive CMF alone cannot overcome.**
+    - This extends Lesson #36 (death cross + strong ADX + positive CMF = valid reversal entry)
+      with a critical jurisdiction carve-out: the pattern is valid for US-listed domestic names
+      but NOT for ADRs from geopolitically-sensitive jurisdictions (China, Russia, etc.).
+    - Also confirms Lesson #55: death-cross reversals need tighter stops (5% max, not 7.5%).
+      The 7.5% stop distance on BABA was too generous — a 5% stop at $121.68 would have saved
+      2.5% of capital.
+
+  ### 59. OXY: Both Prior Rejection Reasons Fixed — CMF and ADX Now Pass (2026-08-24)
+    - OXY was rejected multiple times for marginal CMF (+0.02 range) and ADX < 20. On 8/24,
+      both conditions cleared: CMF +0.063 (meaningful accumulation) and ADX 23.9 (trend
+      confirmed). Golden cross intact, OBV rising, MACD bullish. FA: PEG 0.87, 53% revenue
+      growth, D/E 0.35x pristine.
+    - **Rule: When a repeatedly-rejected ticker clears ALL prior rejection filters, it
+      graduates from watchlist to pending. Don't hold old rejections against a name when
+      the data has changed. Re-screen, don't blacklist (extends Lesson #19).**
+    - However, StochRSI 94.8 is deeply overbought — entry requires a pullback. This is a
+      "golden cross + positive CMF + pullback to support" setup, not the oversold variant.
+
+  ### 60. NVDA: Price Fell Through Entry Zone — Zone Must Be Reset (2026-08-24)
+    - NVDA's prior pending zone ($213.50-217.50) was placed when price was above it. Price
+      has now sliced through the zone with conviction, closing at $211.35 — below the zone
+      bottom. The zone is invalidated. A new zone anchored to SMA50 support ($207.68) is
+      warranted, but CMF remains negative (-0.127) — the non-negotiable gate still fails.
+    - **Rule: When price falls through a pending entry zone from above, the zone is
+      invalidated. Reset the zone to the next support level below. Do not enter just
+      because price is "cheaper" — the fact that it sliced through support means the
+      original thesis was wrong. Re-anchor, re-gate, and wait.**
+    - StochRSI at 1.0 is extreme oversold — historically a bounce setup — but CMF -0.127
+      means the oversold condition signals continuation, not reversal (Lesson #7/#57).
+
+    ### 61. OXY: Overbought StochRSI + Doji at Resistance = Violent Pullback (2026-08-25)
+      - OXY pending entry zone ($60.49-61.43) was set at SMA20 support. StochRSI was 94.8
+        (extreme overbought) with a doji at $61.43 resistance. Price fell through the entire
+        zone and below the stop ($59.80) to $59.06 in a single session — no fill, no loss.
+      - **Rule: When StochRSI > 90 and a doji prints at resistance, the subsequent pullback
+        can be violent. For Energy names with StochRSI > 90, wait for the pullback to fully
+        play out before setting a zone, or anchor the zone to SMA50 (not SMA20).**
+      - The correct read was "wait for pullback" — but the zone was too optimistic. The
+        overbought condition correctly predicted the pullback; the zone just wasn't wide enough.
+
+    ### 62. MU: ADX < 20 + CMF Negative = No Entry Despite Elite FA (2026-08-25)
+      - MU ranked #1 in full scan (composite 31.7) with PEG 0.14, forward P/E 6.0x, 346%
+        revenue growth, 1369% earnings growth — arguably the best FA in the entire watchlist.
+        But ADX 11.6 (no trend) and CMF -0.06 (mild distribution). Per Lesson #2 and #15:
+        FA quality is irrelevant if ADX < 20 and CMF is negative.
+      - **Rule: The #1 screening candidate can still be a pending/reject. Composite score
+        measures past performance and valuation — it does not measure current trend health.
+        Always gate with ADX > 20 and CMF > 0 before entering any screening top-10 name.**
+      - This reinforces Lesson #13 (momentum trap) and Lesson #15 (great FA cannot override
+        ADX < 20).
+
+    ### 63. Narrow Market Persists — Composite Scores Still Sub-35 (2026-08-25)
+      - Top composite score: MU 31.7. Range: 27.6-31.7. All top-10 scores below 35.
+      - Per Lesson #8: when all composite scores are below 30-35, the market is narrow and
+        selective. Be patient. Don't force trades.
+      - Of 6 new screening candidates, 3 were rejected outright (DAL, CVS, ON) and 3 were
+        placed as pending with gates (MU, COP, C). Zero immediate fills — the market is not
+        offering clean entries right now. This is consistent with a narrow, selective tape.
+
+    ### 64. Asset-Manager + Energy "Screen-topper" Rotation = Broad-Based But Still Gated (2026-08-26)
+      - Full scan (384 tickers) surfaced a NEW cluster: two asset managers (BEN, IVZ) and an
+        oil-services name (NOV) entered the top-10 alongside the usual Energy/Memory leaders.
+        This is a broadening, not a fresh rotation — breadth is improving but entries remain
+        gated (BEN/IVZ overbought near resistance, NOV ADX < 20 + weak FA).
+      - **Rule: When entirely new sectors (asset managers, oil services) appear in the top-10,
+        it confirms the narrow market is loosening — but the same gates (CMF > +0.05, ADX > 20,
+        not overbought, no OBV divergence) still eliminate most. Breadth ≠ buyability.**
+
+    ### 65. WDC: Second Parabolic Momentum Trap in the Memory Complex (2026-08-26)
+      - WDC momentum_12_1 +289.8%, CMF -0.066, ADX 16.8, OBV bearish divergence (price +59%
+        vs OBV +32.8%, falling on 5d/20d/60d), Aroon Down 44 > Up 28, -42.2% off 52wk high.
+        This is the SAME distribution-into-strength signature as MU (Lesson #49/#62), just in
+        a different memory name.
+      - **Rule: The memory sector (MU, WDC) is in a cyclical distribution phase. Both #1-ranked
+        candidates in consecutive sessions are memory names with parabolic momentum + negative
+        CMF + ADX < 20. Do not buy the memory complex until CMF turns positive across the group.
+        A cheap PEG (0.14 MU, 0.87 WDC) is not a reason to catch a falling knife.**
+
+    ### 66. CVX Pending Converted on "Trend-Continuation" Not the Oversold Variant (2026-08-26)
+      - CVX pending ($195-200) triggered at $199.88 with CMF +0.124, ADX 28.1, StochRSI 53.1
+        (cooled, not oversold). This is a golden-cross trend-continuation re-entry on a prior
+        winner, NOT the golden_cross_oversold_cmf_positive pattern (which needs StochRSI < 10).
+        Distinct signal class: re-entering a completed winner on a pullback with CMF intact.
+      - **Rule: A completed T1+T2 winner can be re-entered on a pullback when (1) golden cross
+        intact, (2) CMF > +0.05, (3) StochRSI cooled below ~80. This is trend-continuation,
+        not mean-reversion — log it under composite_screening_top10, not the oversold signal.**
+
+    ### 67. APA: The "Clean" Energy Setup — Trend + Accumulation, No Overbought (2026-08-26)
+      - APA is the first Energy candidate in weeks with ALL structural boxes ticked AND no
+        overbought condition: full SMA stack + golden cross, ADX 25.9, CMF +0.15, OBV confirms
+        (+223% vs price +50%, no divergence), StochRSI 28.5 (cool), MACD bullish. FA: fwd P/E
+        9.8x, PEG 0.82, 27% ROE. Only blemish: 5-day OBV cooling near $42.05 resistance.
+      - **Rule: The rare "clean" Energy setup (trend + accumulation + not overbought) is worth
+        a pending entry anchored to SMA20, because Energy names usually arrive in the top-10
+        ALREADY overbought (Lesson #45). When one arrives cooled-down, it's a differentiated
+        opportunity. Still avoid chasing at market if price is at resistance.**
+
+  ### 68. New-Sector Breadth Expansion Confirms Narrow Market Ending, But CMF Gate Still Dominates (2026-08-28)
+    - Full scan (696 tickers) produced an entirely NEW top-10 cluster: ARCB (trucking),
+      MFC (insurance), ADM (agribusiness), KNX (trucking), NOV (oil services), ALB (lithium),
+      BEN (asset mgmt), CF (ag inputs) — plus MU/APA already covered. This is the broadest
+      sector diversification seen all month, confirming the narrow market (Lessons #8, #63)
+      has ended.
+    - Yet 5 of 8 new names failed the CMF filter (ARCB -0.124, MFC -0.316, ADM -0.067,
+      KNX -0.12, BEN negative). The CMF gate (Lesson #28) remains the single most
+      predictive pre-entry filter even as breadth expands. Only ALB (CMF positive) and CF
+      (golden cross, but ADX 16.2) passed to pending — and both still gated (ADX, overbought).
+    - **Rule: Breadth expansion != buyability. The same filters (CMF > +0.05, ADX > 20, not
+      overbought, no OBV divergence) still eliminate ~75% of candidates even when the market
+      widens. Do not lower standards just because new sectors appear.**
+    - Also: ALB is a US-listed death-cross reversal (ADX 24.5 + positive CMF) — the first
+      valid non-China application of the death_cross_strong_adx_cmf_positive signal since
+      the BABA stop-out. Its outcome will test Lesson #58 (the China-ADR carve-out).
+
+  ### 69. Expired Pending Entries Are Not Failures — They Confirm Momentum (NVDA, APA 2026-08-28)
+    - Two pending entries expired simultaneously with no fill and no loss: NVDA (rallied
+      8.4% above zone top) and APA (rallied 4.7% above zone top). Both were pullback entries
+      placed near resistance; momentum continued without pausing, blowing through the zones.
+    - This reinforces Lesson #34/#51: pullback entries placed during strong uptrends almost
+      never trigger. The correct read was "wait for pullback" but the market didn't offer one.
+    - **Rule: A pending entry expiring with no fill is a WIN in risk terms (no loss) but a
+      MISS in opportunity terms. Move stale entries (price >5% above zone top, 3+ sessions)
+      to closed_trades/ with return 0% rather than letting them clog pending_entries/.**
+
+  ### 71. Writing a Lesson ≠ Applying It — Scan Open Positions Immediately (BABA Meta-Failure 2026-08-28)
+      - Lesson #55 (death-cross stops max 5%) was written on 8/21 while BABA was still alive
+        at $122.21. The stop was at $118.50 (7.5% from entry). The lesson was correct — but
+        it was filed, not applied. Three days later, BABA stopped out at $118.28 (-7.65%).
+        If the stop had been tightened to $121.68 (5%) the day Lesson #55 was written, the
+        loss would have been -5.0% instead of -7.65% — a 2.65% capital savings.
+      - **Rule: When a new lesson changes a rule, immediately scan every open position for
+        that rule. If any position violates the new rule, fix the position — tighten the stop,
+        adjust size, or exit. Do not wait for the next session. A lesson in a file that
+        doesn't change behavior on a live position is just note-taking.**
+      - This is a process-level lesson, not a signal-level one. The framework caught the
+        problem (Lesson #55 was correct). The execution lagged behind the framework.
+
+  ### 70. BP Pending on Life Support — Pullback Overshot the Zone (2026-08-28)
+    - BP pending ($43-44.50 zone, stop $41.90) has fallen to $42.06 — only $0.16 (0.4%)
+      above stop. The pullback that was correctly anticipated (overbought stochastics)
+      overshot the zone entirely, similar to OXY (Lesson #61). Price is below SMA20.
+    - **Rule: When an overbought stock's pullback overshoots the entry zone and price sits
+      within ~0.5% of the stop, do NOT enter. The thesis is under pressure. If it closes
+      below $41.90, expire the pending with no fill. The golden cross + positive CMF thesis
+      may remain valid, but entry timing was wrong — wait for the pullback to fully resolve
+      before setting a new zone (extending Lesson #61).**
+      - UPDATE 2026-09-01: BP expired. CMF flipped from +0.066 to -0.104 (distribution) —
+        the single most important gate deteriorated. ADX 14.9, MACD bearish, OBV falling.
+        Per Lesson #18: no energy sector long without positive CMF. No fill, no loss.
+
+    ### 72. CMF Can Deteriorate Rapidly — Always Re-Check Live at Trigger Time (BP 2026-09-01)
+      - BP's CMF was +0.066 when the pending was created on 8/24. By 9/01, it had flipped
+        to -0.104 — a complete reversal from accumulation to distribution. The price recovered
+        into the zone ($43.73) but the flow had already turned against the thesis.
+      - This is the mirror of Lesson #19 (rejection today ≠ rejection forever): a valid setup
+        today can become invalid tomorrow if CMF flips. The CMF gate must be checked LIVE at
+        trigger time, not assumed from the original analysis.
+      - **Rule: For every pending entry, re-check CMF live before triggering. If CMF has
+        flipped negative since the pending was created, expire the pending immediately —
+        regardless of price action. A price inside the zone with negative CMF is a trap, not
+        a trigger. (Extends Lesson #28.)**
+
+    ### 73. CVX T1 Hit — Risk-Free on Remaining Half (2026-09-01)
+      - CVX v2 (re-entry at $199.88 on 8/26) hit T1 at $208.91 (+4.1% on T1 portion) in
+        just 4 sessions. Per Lesson #5 (defensive/low-beta names: prioritize T1 profit-taking),
+        50% taken at T1. Stop raised to $200.00 (breakeven on remaining half). T2 $215 (+7.6%
+        from entry) remains active.
+      - This is the 4th winning trade from the golden_cross_oversold_cmf_positive signal
+        (XOM x2, CVX x2). The signal is now 4-for-4 with zero false triggers.
+      - **Rule: When a defensive/low-beta name hits T1, take 50% partial and raise stop to
+        breakeven. The remaining half is a risk-free ride to T2. This is the CVX playbook.**
+
+    ### 74. 7 of 10 Screening Candidates Fail CMF — The Filter Remains Dominant (2026-09-01)
+      - Full scan (977 tickers) produced top 10: ALB, ARCB, BEN, ADM, ARW, APA, ALGN, BIDU,
+        C, APPS. 7 of 10 fail CMF: ARCB (-0.018), BEN (-0.197), ADM (-0.05), BIDU (-0.077),
+        C (-0.068), APPS (-0.024), ALB (-0.004). Only ARW (+0.12) and ALGN (+0.076) pass.
+      - This is the 4th consecutive screening where CMF eliminates 70%+ of candidates. The
+        CMF gate (Lesson #28) is not a temporary filter — it's a structural market feature.
+      - **Rule: Expect CMF to eliminate ~70% of screening candidates in any market environment.
+        This is not a narrow-market phenomenon — it's the normal operating baseline. The 2-3
+        candidates that pass CMF are the only ones worth deep-diving.**
+
+    ### 75. ARW: The CVX/XOM Pattern in a New Sector (Technology Distribution) (2026-09-01)
+      - ARW has the exact CVX/XOM DNA (Lesson #21): golden cross + CMF +0.12 (strong
+        accumulation) + StochRSI 24.4 (oversold). FA: PEG 0.95, fwd P/E 8.4x, 47% earnings
+        growth. But ADX 14.5 (<20) — the trend hasn't formed yet.
+      - This is the first time the golden_cross_oversold_cmf_positive pattern has appeared
+        in a Technology distribution name (electronics/components). Prior triggers were all
+        Energy (XOM, CVX) or Financials (BAC).
+      - **Rule: When the CVX/XOM pattern appears in a new sector, treat it as a pending entry
+        gated by ADX > 20. The pattern is 4-for-4 but all in defensive/cyclical sectors.
+        Technology distribution may behave differently — size cautiously on first trigger.**
+
+    ### 76. ALGN: The Corrected META Pattern — Death Cross + Extreme Oversold + Positive CMF (2026-09-01)
+      - ALGN: StochRSI 8.8, CCI -1554.8 (extreme oversold), CMF +0.076 (accumulation),
+        PEG 0.75, fwd P/E 12.7x, 31% analyst upside. Death cross active, Aroon Down 96.
+        This is the META v2 pattern (Lesson #21/#35): death cross + extreme oversold +
+        positive CMF + elite FA = mean-reversion trade.
+      - The positive CMF is the critical differentiator from the META v1 failure (CMF -0.053).
+        ADX 17.5 is approaching 20 — trend exhaustion is near.
+      - **Rule: Death cross + extreme oversold (StochRSI < 10, CCI < -1000) + CMF > +0.05 +
+        PEG < 1.0 = actionable mean-reversion setup. This is the corrected
+        extreme_oversold_fa_backstop signal. Per Lesson #35: take 75% at T1 on death-cross
+        reversals. Gated by ADX > 20 for entry.**
+
