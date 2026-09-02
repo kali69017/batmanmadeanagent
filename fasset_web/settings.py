@@ -100,6 +100,13 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
+        "OPTIONS": {
+            # Wait up to 20s for a write lock instead of erroring immediately.
+            # The web app and the scheduled scan both hit db.sqlite3; SQLite
+            # allows one writer at a time, so a short wait avoids
+            # "database is locked" during normal overlap.
+            "timeout": 20,
+        },
     }
 }
 
