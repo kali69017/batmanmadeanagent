@@ -36,6 +36,8 @@ def create_model():
         base_url=config.BASE_URL,
         api_key=config.API_KEY,
         temperature=0,
+        timeout=120,
+        max_retries=2,
     )
 
 

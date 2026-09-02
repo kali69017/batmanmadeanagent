@@ -9,5 +9,7 @@ yf_data_archive.zip
 db.sqlite3
 *.log
 agent_fs/users/
+agent_fs/memories/tmp/
 deepagents-main/
 deepagentsLatestRepo/
+staticfiles/

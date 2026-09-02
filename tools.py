@@ -1,4 +1,5 @@
 import contextlib
+import concurrent.futures
 import functools
 import io
 import json
@@ -19,6 +20,25 @@ import config
 _combined_history_df: pd.DataFrame | None = None
 _intraday_cache: dict = {}
 _intraday_ohlcv_cache: dict = {}
+
+
+def _with_timeout(fn, seconds: float = 30.0, default=None):
+    """Run `fn` in a worker thread and return its result, or `default` if it
+    exceeds `seconds`.
+
+    yfinance's `.history()` / `.info` / `.news` calls have no built-in timeout
+    and block indefinitely under Yahoo rate-limiting — this is what hung whole
+    scheduled scans for 12+ hours. On timeout the stuck thread is abandoned
+    (shutdown wait=False) so the caller keeps moving.
+    """
+    ex = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+    fut = ex.submit(fn)
+    try:
+        return fut.result(timeout=seconds)
+    except concurrent.futures.TimeoutError:
+        return default
+    finally:
+        ex.shutdown(wait=False)
 
 
 # ---------------------------------------------------------------------------
@@ -229,7 +249,13 @@ def _get_ohlcv(
     if not force_refresh:
         hist = _history_from_cache(symbol, period)
     if hist is None or hist.empty:
-        hist = yf.Ticker(symbol).history(period=period, interval="1d", auto_adjust=True)
+        hist = _with_timeout(
+            lambda: yf.Ticker(symbol).history(
+                period=period, interval="1d", auto_adjust=True
+            ),
+            30.0,
+            None,
+        )
     if hist is not None and not hist.empty:
         _intraday_ohlcv_set(symbol, period, hist)
     if hist is None or hist.empty:
@@ -377,7 +403,7 @@ def get_fundamentals(symbol: str, force_refresh: bool = False) -> str:
         cached_intraday = _intraday_get(sym, "fundamentals")
         if cached_intraday is not None:
             return json.dumps({**cached_intraday, "source": "intraday_cache"})
-    info = yf.Ticker(sym).info or {}
+    info = _with_timeout(lambda: yf.Ticker(sym).info, 30.0, {}) or {}
     result = {"symbol": sym, "source": "live"}
     for f in config.FUNDAMENTALS_FIELDS:
         result[f] = info.get(f)
@@ -1412,7 +1438,7 @@ def get_news_headlines(symbol: str, limit: int = 5, force_refresh: bool = False)
             items = [_extract_headline(n) for n in cached["news"][:limit]]
             return json.dumps({"symbol": sym, "headlines": items, "source": "cache"})
     try:
-        news = yf.Ticker(sym).news or []
+        news = _with_timeout(lambda: yf.Ticker(sym).news, 30.0, []) or []
     except Exception as e:
         return json.dumps({"symbol": sym, "error": str(e), "source": "live"})
     items = [_extract_headline(n) for n in news[:limit]]

@@ -152,6 +152,7 @@ if __name__ == "__main__":
         {"messages": [{"role": "user", "content": query}]},
         stream_mode="updates",
         subgraphs=True,
+        config={"recursion_limit": 50},
     ):
         if isinstance(chunk, tuple) and len(chunk) == 2:
             namespace, updates = chunk

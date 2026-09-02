@@ -1,9 +1,0 @@
-{
-  "ticker": "CVX",
-  "direction": "hold",
-  "entry_zone": {"low": null, "high": null},
-  "stop_loss": null,
-  "targets": [],
-  "conviction": "MEDIUM",
-  "rationale": "CVX just completed a profitable T1+T2 run ($186.56→$200) and now trades at $205.65 — above both the pending $195–200 re-entry zone and the $206.22 resistance, with StochRSI at 94.8 well above the 80 gate threshold. While fundamentals remain compelling (PEG 0.77, 53.5% revenue growth, D/E 0.19x) and the golden cross/CMF +0.149 support the bull case, the extreme overbought reading and extension above the Bollinger band argue for patience. Hold existing positions; wait for a pullback into the $195–200 zone with StochRSI cooling below 80 before re-entering."
-}

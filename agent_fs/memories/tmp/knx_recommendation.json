@@ -1,9 +1,0 @@
-{
-  "ticker": "KNX",
-  "direction": "hold",
-  "entry_zone": {"low": null, "high": null},
-  "stop_loss": null,
-  "targets": [],
-  "conviction": "MEDIUM",
-  "rationale": "FA is attractive (PEG 0.49, 17.2x fwd P/E, 29% analyst upside to $88.63) but razor-thin 0.56% net margins limit conviction. TA is dangerously conflicted: a golden cross suggests long-term bullish structure, yet severe OBV divergence (-66.5% vs price +9.3%), negative CMF (-0.12), and price below SMA20/SMA50 point to active distribution and short-term weakness. The oversold Williams %R could spark a bounce, but entering into confirmed distribution with no clear support levels from the TA is reckless. Existing holders can ride the fundamental story; new entries should wait for volume confirmation that distribution has ended and price reclaims the SMAs."
-}
