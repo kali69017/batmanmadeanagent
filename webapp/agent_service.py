@@ -237,7 +237,6 @@ class AgentRunner:
             {"messages": self._build_messages(query, scan)},
             stream_mode="updates",
             subgraphs=True,
-            config={"recursion_limit": 50},
         ):
             for ev in _normalize_chunk(chunk, tool_called, written, reviewed):
                 if ev["type"] == "response" and ev["content"].strip():
