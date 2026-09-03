@@ -89,6 +89,16 @@ class SignalLog(models.Model):
     triggered_correctly = models.IntegerField(default=0)
     triggered_falsely = models.IntegerField(default=0)
     win_rate = models.FloatField(null=True, blank=True)
+    # --- Expectancy-based evidence (added by the learning upgrade) ---------
+    n_trades = models.IntegerField(default=0)
+    n_missing_return = models.IntegerField(default=0)
+    mean_return_pct = models.FloatField(null=True, blank=True)
+    median_return_pct = models.FloatField(null=True, blank=True)
+    total_return_pct = models.FloatField(null=True, blank=True)
+    best_return_pct = models.FloatField(null=True, blank=True)
+    worst_return_pct = models.FloatField(null=True, blank=True)
+    verdict = models.CharField(max_length=16, blank=True, default="insufficient")
+    evidence_note = models.TextField(blank=True, default="")
     notes = models.TextField(blank=True, default="")
     updated_at = models.DateTimeField(auto_now=True)
 

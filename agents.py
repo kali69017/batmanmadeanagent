@@ -438,8 +438,8 @@ first if there are carryover positions.
 - If a trade should close: write updated file to closed_trades/, delete from open_trades/
 - Every closed-trade file MUST include `signals_used: [...]` (the signal names that drove the entry, e.g. ["composite_screening_top10", "extreme_oversold_fa_backstop"]) plus numeric `return_realized_pct` so win rates can be computed. If a trade was stopped out, that is a counted miss for every signal in signals_used.
 - Update lessons.md with any new generalizable insights (MANDATORY — do this every run)
-- Check signals_log/ via read_file for win rate context
-- If any signal had <40% win rate, note it as unreliable
+- Check signals_log/ via read_file for each signal's `verdict` + `mean_return_pct` + `evidence_note` context
+- Signal-use rule (REPLACES the old "<40% win rate" test): Only act on signals whose `verdict` is `confirmed` or `promising`. Treat `insufficient` as unproven — do NOT weight it, regardless of win rate. Treat `failing` as do-not-use. When two signals are both usable, prefer the one with the higher `mean_return_pct` (expectancy), NOT the higher `win_rate` — a high win rate with low expectancy is a trap. Weight by verdict and expectancy, never by win rate alone.
 - IMPORTANT: Distinguish between open_trades/ (type: filled — positions you actually entered) and pending_entries/ (type: pending — entry zone not yet triggered). Count only filled entries as real open positions.
 - IMPORTANT: When reporting active positions, show BOTH the live price from get_price_data AND the stored entry/stop/target levels, and reference any applicable lessons. The answer must reflect current market status, not just the memory files.
 

@@ -261,6 +261,9 @@ def sync_shared_signals() -> int:
         false = _parse_int(fm.get("triggered_falsely"))
         total = (correct or 0) + (false or 0)
         win_rate = round(correct / total, 3) if total else None
+        # If expectancy fields were written by learning.py, persist them as-is;
+        # this keeps DB and markdown consistent regardless of which writer ran.
+        n_trades = _parse_int(fm.get("n_trades")) or 0
         SignalLog.objects.update_or_create(
             name=name,
             defaults={
@@ -268,6 +271,15 @@ def sync_shared_signals() -> int:
                 "triggered_falsely": false or 0,
                 "win_rate": win_rate,
                 "notes": fm.get("notes") or "",
+                "n_trades": n_trades,
+                "n_missing_return": _parse_int(fm.get("n_missing_return")) or 0,
+                "mean_return_pct": _parse_float(fm.get("mean_return_pct")),
+                "median_return_pct": _parse_float(fm.get("median_return_pct")),
+                "total_return_pct": _parse_float(fm.get("total_return_pct")),
+                "best_return_pct": _parse_float(fm.get("best_return_pct")),
+                "worst_return_pct": _parse_float(fm.get("worst_return_pct")),
+                "verdict": (fm.get("verdict") or "insufficient"),
+                "evidence_note": fm.get("evidence_note") or "",
             },
         )
         count += 1
