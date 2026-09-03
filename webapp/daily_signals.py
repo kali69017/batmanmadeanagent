@@ -124,10 +124,19 @@ def generate_daily_signals(username: str) -> list[dict]:
     DailySignal.objects.filter(owner=user, scan_date=today).delete()
 
     signals = []
+    emitted: set[str] = set()
 
     def _emit(ticker, direction, entry_low, entry_high, tp1, tp2, stop, reason):
         if ticker not in config.WATCHLIST:
             return
+        # One signal per ticker per day. load_positions can return the same
+        # ticker more than once (multiple open files, or a ticker in both open
+        # and pending); the (owner, scan_date, ticker) UNIQUE constraint would
+        # reject the second insert. Keep the first — open/hold wins over
+        # pending/buy.
+        if ticker in emitted:
+            return
+        emitted.add(ticker)
         obj = DailySignal.objects.create(
             owner=user,
             scan_date=today,
